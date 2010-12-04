@@ -50,9 +50,11 @@ abstract class ClassFileMapFactory
 
 		$sHiddenFiles = '/\/\.\w+/';
 
-		//------------------------------------------
-		// Load the list of files in the directory
-		//------------------------------------------
+		$aDeclarations = array();
+		
+		/*
+		 * Load the list of files in the directory
+		 */
 		foreach ($oFiles as $sName => $aFile) {
 			if (! preg_match($sHiddenFiles, $sName) && !$aFile->isDir()) {
 				$oFile = $aFile->openFile();
@@ -62,10 +64,10 @@ abstract class ClassFileMapFactory
 					$sContents .= $oFile->fgets();
 				}
 
-				//----------------------------------------
-				// Tokenize the source and grab the classes
-				// and interfaces
-				//----------------------------------------
+				/*
+				 * Tokenize the source and grab the classes
+				 * and interfaces
+				 */
 				$fileNamespace = '';
 				$aTokens = token_get_all($sContents);
 				$iNumtokens = count($aTokens);
@@ -89,6 +91,7 @@ abstract class ClassFileMapFactory
 								 $fileNamespace .= $aTokens[$i][1];
 								 $i++;
 							}
+							// add trailing \ if not present
 							if (strcmp($fileNamespace[strlen($fileNamespace) - 1], '\\') !== 0) {
 								$fileNamespace .= '\\';
 							}
@@ -102,7 +105,7 @@ abstract class ClassFileMapFactory
 				}
 			}
 		}
-		print_r($aDeclarations);
+		//print_r($aDeclarations);	
 		return $aDeclarations;
 	}
 }
