@@ -56,7 +56,7 @@ class ClassFileMapAutoloader
 			return false;
 		}
 		
-		$sPath = $this->_doLookup($sClass);
+		$sPath = $this->lookup($sClass);
 		if ($sPath !== null) {
 			require_once $sPath;
 		}
@@ -70,7 +70,7 @@ class ClassFileMapAutoloader
 	 * @param string $sClassName
 	 * @return string the path of the class, or null if not found
 	 */
-	private function _doLookup($sClassName)
+	public function lookup($sClassName)
 	{
 		foreach ($this->_aClassFileMaps as $oClassFileMap) {
 			$sPath = $oClassFileMap->lookup($sClassName);
@@ -80,5 +80,37 @@ class ClassFileMapAutoloader
 		}
 
 		return null;
+	}
+	
+	/**
+	 * Looks through all the class paths loaded into ClassFileMaps used by this
+	 * autoloader and returns the class names contained in that file in an
+	 * array.
+	 * @param array $path of the class names contained in the file path.
+	 * @throws Exception if there is more than one
+	 */
+	public function reverseLookup($path)
+	{
+		// sanity check
+		if (! is_file($path)) {
+			throw new AppException('The specified location is not a file');
+		}
+		if (! is_readable($path)) {
+			throw new AppException('The path `'.$path.'` is not readable');
+		}
+
+		$path = realpath($path);
+		$classes = array();
+		foreach ($this->_aClassFileMaps as $classFileMap) {
+			$classFilemapArray = $classFileMap->getClassMap();
+			if ($classFilemapArray != null) {
+				$class = array_search($path, $classFilemapArray);
+				if ($class !== false) {
+					array_push($classes, $class);
+				}
+			}
+		}
+		
+		return $classes;
 	}
 }
