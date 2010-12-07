@@ -99,7 +99,9 @@ abstract class ClassFileMapFactory
 						case T_CLASS:
 						case T_INTERFACE:
 							$i += 2; //skip the whitespace token
-							$aDeclarations["{$fileNamespace}{$aTokens[$i][1]}"] = $sName;
+							if (isset($aTokens[$i][1])) {
+								$aDeclarations["{$fileNamespace}{$aTokens[$i][1]}"] = $sName;
+							}
 							break;
 					}
 				}
