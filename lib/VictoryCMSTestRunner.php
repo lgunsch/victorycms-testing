@@ -108,8 +108,6 @@ class VictoryCMSTestRunner
 		if (! $registered) {
 			exit('VictoryCMS could not attach the required testing autoloader!');
 		}
-		
-		//print_r($this->autoLoader);
 	}
 	
 	/**
@@ -117,29 +115,58 @@ class VictoryCMSTestRunner
 	 */
 	public function run()
 	{
-		$this->runLibTest();
-		$this->runAppTest();
+		$this->runTestGroupsByPath($this->libTestPath, 'lib');
+		$this->runTestGroupsByPath($this->appTestPath, 'app');
 	}
 
-	protected function runLibTest()
+	/**
+	 * Run test suites grouped by the directories and sub-directories.
+	 * @param string $testPath Path containing optional sub-directories and test cases.
+	 * @param string $baseName Base-name to prepend to test suite names.
+	 */
+	protected function runTestGroupsByPath($testPath, $baseName)
 	{
-		$path = realpath($this->libTestPath);
-		$files = new \RecursiveIteratorIterator(
-			new \RecursiveDirectoryIterator($path),
-			\RecursiveIteratorIterator::SELF_FIRST
-		);
+		$files = \VictoryCMS\FileUtils::findPHPFiles($testPath);
 		
-		//print_r($files);
-	}
-	
-	protected function runAppTest()
-	{
-		$path = realpath($this->appTestPath);
-		$files = new \RecursiveIteratorIterator(
-			new \RecursiveDirectoryIterator($path),
-			\RecursiveIteratorIterator::SELF_FIRST
-		);
+		/* Collect the tests case paths under each directory, remove the common
+		 * part of the path, and replace the directory separators with -.
+		 */
+		$dirs = array();
+		foreach ($files as $name => $object) {
+			if(is_file($name) && is_readable($name)) {
+				$dirName = dirname($name);
+				$dirName = str_replace($this->libTestPath, $baseName, $dirName);
+				$dirName = str_replace(''.DIRECTORY_SEPARATOR, '-', $dirName);
+				if (isset($dirs[$dirName])) {
+					array_push($dirs[$dirName], $name);
+				} else {
+					$dirs[$dirName] = array(0 => $name);
+				}
+			}
+		}
 		
-		//print_r($files);
+		/* Run each set of test cases - each test suite is 1 directory */
+		foreach ($dirs as $testName => $pathArray) {
+			$test = new \TestSuite('Test Suite: '.$testName);
+			foreach ($pathArray as $i => $path) {
+				/* reverse-lookup the classes from each path. If the class
+				 * is a UnitTestCase then add it into the test suite
+				 */
+				$classes = $this->autoLoader->reverseLookup($path);
+				foreach ($classes as $index => $class) {
+					$instance = new $class;
+					if ($instance instanceof \UnitTestCase) {
+						$test->addFile($path);
+					}
+					unset($class);
+				}
+			}
+			/* run this test suite */
+			if (\TextReporter::inCli()) {
+				$test->run(new \TextReporter());
+			} else {
+				$test->run(new \HtmlReporter());
+			}
+		}
 	}
 }
