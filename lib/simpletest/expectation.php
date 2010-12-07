@@ -3,7 +3,7 @@
  *    base include file for SimpleTest
  *    @package    SimpleTest
  *    @subpackage    UnitTester
- *    @version    $Id: expectation.php 1905 2009-07-29 13:54:00Z dgheath $
+ *    @version    $Id$
  */
 
 /**#@+

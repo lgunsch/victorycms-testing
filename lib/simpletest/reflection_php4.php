@@ -3,7 +3,7 @@
  *  base include file for SimpleTest
  *  @package    SimpleTest
  *  @subpackage UnitTester
- *  @version    $Id: reflection_php4.php 1672 2008-03-02 04:47:34Z edwardzyang $
+ *  @version    $Id$
  */
 
 /**

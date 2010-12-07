@@ -3,7 +3,7 @@
  *  base include file for SimpleTest
  *  @package    SimpleTest
  *  @subpackage WebTester
- *  @version    $Id: encoding.php 1964 2009-10-13 15:27:31Z maetl_ $
+ *  @version    $Id$
  */
     
 /**#@+

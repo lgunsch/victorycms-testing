@@ -1,9 +1,15 @@
 <?php
 /**
- *	base include file for SimpleTest
+ *	Extension for a TestDox reporter
  *	@package	SimpleTest
  *	@subpackage	Extensions
- *	@version	$Id: testdox.php 1982 2010-03-28 11:57:54Z lastcraft $
+ *	@version	$Id$
+ */
+
+/**
+ * 	TestDox reporter 
+ *	@package	SimpleTest
+ *	@subpackage	Extensions
  */
 class TestDoxReporter extends SimpleReporter
 {

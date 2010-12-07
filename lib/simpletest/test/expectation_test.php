@@ -1,5 +1,5 @@
 <?php
-// $Id: expectation_test.php 1905 2009-07-29 13:54:00Z dgheath $
+// $Id$
 require_once(dirname(__FILE__) . '/../autorun.php');
 require_once(dirname(__FILE__) . '/../expectation.php');
 

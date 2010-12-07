@@ -3,7 +3,7 @@
  *  base include file for SimpleTest
  *  @package    SimpleTest
  *  @subpackage UnitTester
- *  @version    $Id: scorer.php 1982 2010-03-28 11:57:54Z lastcraft $
+ *  @version    $Id$
  */
 
 /**#@+*/

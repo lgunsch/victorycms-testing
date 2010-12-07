@@ -1,5 +1,5 @@
 <?php
-// $Id: acceptance_test.php 1972 2009-12-13 21:38:19Z lastcraft $
+// $Id$
 require_once(dirname(__FILE__) . '/../autorun.php');
 require_once(dirname(__FILE__) . '/../compatibility.php');
 require_once(dirname(__FILE__) . '/../browser.php');

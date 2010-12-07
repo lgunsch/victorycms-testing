@@ -3,7 +3,7 @@
  *  Optional include file for SimpleTest
  *  @package    SimpleTest
  *  @subpackage UnitTester
- *  @version    $Id: default_reporter.php 1995 2010-04-06 12:57:40Z lastcraft $
+ *  @version    $Id$
  */
 
 /**#@+
