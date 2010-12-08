@@ -135,7 +135,7 @@ class VictoryCMSTestRunner
 		foreach ($files as $name => $object) {
 			if(is_file($name) && is_readable($name)) {
 				$dirName = dirname($name);
-				$dirName = str_replace($this->libTestPath, $baseName, $dirName);
+				$dirName = str_replace($testPath, $baseName, $dirName);
 				$dirName = str_replace(''.DIRECTORY_SEPARATOR, '-', $dirName);
 				if (isset($dirs[$dirName])) {
 					array_push($dirs[$dirName], $name);
