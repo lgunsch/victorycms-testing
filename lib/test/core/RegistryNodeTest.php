@@ -61,9 +61,53 @@ class RegistryNodeTest extends UnitTestCase
 		$this->assertIdentical($node->getValue(), $obj);
 	}
 	
+	public function testAttachGetValue()
+	{
+		$str = "myValue";
+		$node = new RegistryNode(null);
+		$node->setAttachedValue($str);
+		$str .= "__stuff";
+		// this seems to not work as exptected
+		//$this->assertReference($str, $node->getValue());
+		$this->assertIdentical($str, $node->getValue());
+		
+		$arr = array("my_array", 2, "three"=>3);
+		$node = new RegistryNode(null);
+		$node->setAttachedValue($arr);
+		array_push($arr, "four", "five");
+		// this seems to not work as exptected
+		//$this->assertReference($arr, $node->getValue());
+		$this->assertIdentical($arr, $node->getValue());
+		
+		$obj = new RegistryNode('val');
+		$node = new RegistryNode(null);
+		$node->setAttachedValue($obj);
+		$obj->setValue('changedNow');
+		// this seems to not work as exptected
+		//$this->assertIdentical($node->getValue(), $obj);
+		$this->assertIdentical($obj, $node->getValue());
+	}
+	
 	public function testReadOnly()
 	{
 		$node = new RegistryNode("myval");
+		$node->setReadOnly();
+		$this->assertTrue($node->isReadOnly());
+		try {
+			$node->setValue("myval");
+			$this->fail("Should not be able to set value of readonly node.");
+		} catch (\VictoryCMS\Exception\OverwriteException $e) {}
+		
+		$node = new RegistryNode("myval", true);
+		$this->assertTrue($node->isReadOnly());
+		try {
+			$node->setValue("myval");
+			$this->fail("Should not be able to set value of readonly node.");
+		} catch (\VictoryCMS\Exception\OverwriteException $e) {}
+		
+		$obj = array("my"=>'value');
+		$node = new RegistryNode(null);
+		$node->setAttachedValue($obj);
 		$node->setReadOnly();
 		$this->assertTrue($node->isReadOnly());
 		try {
