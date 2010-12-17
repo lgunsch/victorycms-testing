@@ -132,15 +132,15 @@ class VictoryCMSTestRunner
 		 * part of the path, and replace the directory separators with -.
 		 */
 		$dirs = array();
-		foreach ($files as $name => $object) {
-			if(is_file($name) && is_readable($name)) {
-				$dirName = dirname($name);
+		foreach ($files as $filePath) {
+			if(is_file($filePath) && is_readable($filePath)) {
+				$dirName = dirname($filePath);
 				$dirName = str_replace($testPath, $baseName, $dirName);
 				$dirName = str_replace(''.DIRECTORY_SEPARATOR, '-', $dirName);
 				if (isset($dirs[$dirName])) {
-					array_push($dirs[$dirName], $name);
+					array_push($dirs[$dirName], $filePath);
 				} else {
-					$dirs[$dirName] = array(0 => $name);
+					$dirs[$dirName] = array(0 => $filePath);
 				}
 			}
 		}
