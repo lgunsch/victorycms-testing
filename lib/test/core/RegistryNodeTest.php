@@ -2,7 +2,7 @@
 //
 //  VictoryCMS - Content managment system and framework.
 //
-//  Copyright (C) 2010  Andrew Crouse <amcrouse@victorycms.org>
+//  Copyright (C) 2010  Lewis Gunsch <lgunsch@victorycms.org>
 //
 //  This file is part of VictoryCMS.
 //
