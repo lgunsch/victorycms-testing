@@ -86,8 +86,10 @@ class ClassFileMapAutoloader
 	 * Looks through all the class paths loaded into ClassFileMaps used by this
 	 * autoloader and returns the class names contained in that file in an
 	 * array.
+	 * 
 	 * @param array $path of the class names contained in the file path.
-	 * @throws Exception if there is more than one
+	 * 
+	 * @return array of Classes contained in the file $path.
 	 */
 	public function reverseLookup($path)
 	{
@@ -99,18 +101,22 @@ class ClassFileMapAutoloader
 			throw new AppException('The path `'.$path.'` is not readable');
 		}
 
+		/*
+		 * Search through each class file map array and get all the keys that match
+		 * the path.
+		 */
 		$path = realpath($path);
 		$classes = array();
 		foreach ($this->_aClassFileMaps as $classFileMap) {
 			$classFilemapArray = $classFileMap->getClassMap();
 			if ($classFilemapArray != null) {
-				$class = array_search($path, $classFilemapArray);
-				if ($class !== false) {
+				$matched = array_keys($classFilemapArray, $path);
+				foreach ($matched as $class) {
 					array_push($classes, $class);
 				}
 			}
 		}
-		
+
 		return $classes;
 	}
 }

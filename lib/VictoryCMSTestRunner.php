@@ -118,49 +118,23 @@ class VictoryCMSTestRunner
 		$this->runTestGroupsByPath($this->libTestPath, 'lib');
 		$this->runTestGroupsByPath($this->appTestPath, 'app');
 	}
-
+	
 	/**
 	 * Run test suites grouped by the directories and sub-directories.
+	 * 
 	 * @param string $testPath Path containing optional sub-directories and test cases.
 	 * @param string $baseName Base-name to prepend to test suite names.
 	 */
 	protected function runTestGroupsByPath($testPath, $baseName)
 	{
 		$files = \VictoryCMS\FileUtils::findPHPFiles($testPath);
-		
-		/* Collect the tests case paths under each directory, remove the common
-		 * part of the path, and replace the directory separators with -.
-		 */
-		$dirs = array();
-		foreach ($files as $filePath) {
-			if(is_file($filePath) && is_readable($filePath)) {
-				$dirName = dirname($filePath);
-				$dirName = str_replace($testPath, $baseName, $dirName);
-				$dirName = str_replace(''.DIRECTORY_SEPARATOR, '-', $dirName);
-				if (isset($dirs[$dirName])) {
-					array_push($dirs[$dirName], $filePath);
-				} else {
-					$dirs[$dirName] = array(0 => $filePath);
-				}
-			}
-		}
+		$testCases = $this->buildTestCaseArray($testPath, $baseName, $files);
 		
 		/* Run each set of test cases - each test suite is 1 directory */
-		foreach ($dirs as $testName => $pathArray) {
-			$test = new \TestSuite('Test Suite: '.$testName);
-			foreach ($pathArray as $i => $path) {
-				/* reverse-lookup the classes from each path. If the class
-				 * is a UnitTestCase then add it into the test suite
-				 */
-				$classes = $this->autoLoader->reverseLookup($path);
-				foreach ($classes as $index => $class) {
-					$instance = new $class;
-					if ($instance instanceof \UnitTestCase) {
-						$test->addFile($path);
-					}
-					unset($class);
-				}
-			}
+		foreach ($testCases as $testName => $pathArray) {
+			
+			$test = $this->buildTestSuite($testName, $pathArray);
+			
 			/* run this test suite */
 			if (\TextReporter::inCli()) {
 				$test->run(new \TextReporter());
@@ -168,5 +142,71 @@ class VictoryCMSTestRunner
 				$test->run(new \HtmlReporter());
 			}
 		}
+	}
+	
+	/**
+	 * This collects the test case paths under each directory, replaces the common
+	 * part of the path with the $baseName, and replace the directory separators
+	 * with -.
+	 * 
+	 * @param string $testPath full test path to match against the files.
+	 * @param string $baseName Base-name to prepend to test suite names.
+	 * @param array $files of full PHP test case paths.
+	 * 
+	 * @return array of arrays with the key being a test case name and the value
+	 * being an array of paths to be loaded for the test case.
+	 */
+	private function buildTestCaseArray($testPath, $baseName, $files)
+	{
+		$testCases = array();
+		foreach ($files as $filePath) {
+			if(is_file($filePath) && is_readable($filePath)) {
+				$dirName = dirname($filePath);
+				$dirName = str_replace($testPath, $baseName, $dirName);
+				$dirName = str_replace(''.DIRECTORY_SEPARATOR, '-', $dirName);
+				if (array_key_exists($dirName, $testCases)) {
+					array_push($testCases[$dirName], $filePath);
+				} else {
+					$testCases[$dirName] = array(0 => $filePath);
+				}
+			}
+		}
+		
+		return $testCases;
+	}
+	
+	/**
+	 * This creates a new TestSuite with the given name and loads it with the test
+	 * any UnitTestCase classes located in the PHP files listed in the array
+	 * $pathArray.
+	 * 
+	 * @param string $testName TestSuite name.
+	 * @param array $pathArray PHP file paths to look for UnitTestSuite classes.
+	 * 
+	 * @return \TestSuite of UnitTestCase's.
+	 */
+	private function buildTestSuite($testName, $pathArray)
+	{
+		$test = new \TestSuite('Test Suite: '.$testName);
+		foreach ($pathArray as $i => $path) {
+			/* reverse-lookup the classes from each path. If the class
+			 * is a UnitTestCase then add it into the test suite
+			 */
+			$classes = $this->autoLoader->reverseLookup($path);
+			foreach ($classes as $index => $class) {
+				/* If class is a singleton then it will have a private 
+				 * constructor. We can determine this using a reflection class.
+				 */
+				$rfClass = new \ReflectionClass($class);
+				$constructor = $rfClass->getConstructor();
+				if (! ($constructor->isPrivate() || $constructor->isProtected())) {
+					$instance = new $class;
+					if ($instance instanceof \UnitTestCase) {
+						$test->addFile($path);
+					}	
+				}
+			}
+		}
+		return $test;
 	}
 }
