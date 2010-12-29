@@ -23,6 +23,14 @@ use VictoryCMS\RegistryKeys;
 use VictoryCMS\Registry;
 use VictoryCMS\AutoLoader;
 
+class AutoLoaderTester extends AutoLoader
+{
+	public static function returnPattern($class)
+	{
+		return static::getPattern($class);
+	}
+}
+
 class AutoLoaderTest extends UnitTestCase
 {
 	protected $tempDir;
@@ -34,6 +42,8 @@ class AutoLoaderTest extends UnitTestCase
 	
 	public function setup()
 	{
+		AutoLoaderTester::getInstance();
+		
 		// get a temporary unique name
 		$tempName = tempnam(sys_get_temp_dir(), 'autoload_test');
 		if ($tempName === false) {
@@ -122,6 +132,11 @@ class AutoLoaderTest extends UnitTestCase
 			AutoLoader::addDir('');
 			$this->fail("Should not be able to add an empty string.");
 		} catch (\VictoryCMS\Exception\DataTypeException $e) {}
+	}
+	
+	public function testPattern()
+	{
+		echo "Pattern is ".AutoLoaderTester::returnPattern('VictoryCMS\FileUtils')."\n";
 	}
 	
 	public function testFlatDirLoad()
