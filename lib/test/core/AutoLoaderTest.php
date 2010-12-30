@@ -136,8 +136,10 @@ class AutoLoaderTest extends UnitTestCase
 	
 	public function testPattern()
 	{
-		$pattern = AutoLoaderTester::returnPattern('VictoryCMS\FileUtils');
-		$pattern2 = AutoLoaderTester::returnPattern('\VictoryCMS\FileUtils');
+		$patterns = array(
+			AutoLoaderTester::returnPattern('VictoryCMS\FileUtils'),
+			AutoLoaderTester::returnPattern('\VictoryCMS\FileUtils')
+		);
 		
 		// Test valid matches
 		$fileNames = array(
@@ -158,14 +160,27 @@ class AutoLoaderTest extends UnitTestCase
 			'victORYcms fileuTiLs.php',
 			'victORYcms...fileuTiLs.php',
 			'victORYcms--fileuTiLs.php',
-			'victORYcms 	 fileuTiLs.php',
+			'victORYcms 	 fileuTiLs.php'
 		);
 		
+		$upTo = count($fileNames);
+		for ($i = 0; $i < $upTo; $i++) {
+			// make even more valid combinations
+			array_push($fileNames, 'class.'.$fileNames[$i]);
+			array_push($fileNames, str_replace('.php', '.inc.php', $fileNames[$i]));
+			array_push($fileNames, 'class.'.str_replace('.php', '.inc.php', $fileNames[$i]));
+			array_push($fileNames, str_replace('.php', '.class.php', $fileNames[$i]));
+			array_push($fileNames, 'class.'.str_replace('.php', '.class.php', $fileNames[$i]));
+			array_push($fileNames, str_replace('.php', '.inc.class.php', $fileNames[$i]));
+			array_push($fileNames, 'class.'.str_replace('.php', '.inc.class.php', $fileNames[$i]));
+		}
+		
 		foreach ($fileNames as $fileName) {
-			$num = preg_match($pattern, $fileName);
-			$this->assertIdentical(1, $num);
-			$num = preg_match($pattern2, $fileName);
-			$this->assertIdentical(1, $num);
+			echo "Matching: $fileName\n";
+			foreach($patterns as $pattern) {
+				$num = preg_match($pattern, $fileName);
+				$this->assertIdentical(1, $num);
+			}
 		}
 		
 		// Test non-matching
@@ -184,11 +199,11 @@ class AutoLoaderTest extends UnitTestCase
 			'VictoryCMS::FileUtils.php'
 		);
 		
-		foreach ($badNames as $badName) {
-			$num = preg_match($pattern, $badName);
-			$this->assertIdentical(0, $num);
-			$num = preg_match($pattern2, $badName);
-			$this->assertIdentical(0, $num);
+	foreach ($badNames as $badName) {
+			foreach($patterns as $pattern) {
+				$num = preg_match($pattern, $badName);
+				$this->assertIdentical(0, $num);
+			}
 		}
 	}
 	
