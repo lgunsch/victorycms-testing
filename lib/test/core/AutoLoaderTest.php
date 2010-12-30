@@ -136,7 +136,60 @@ class AutoLoaderTest extends UnitTestCase
 	
 	public function testPattern()
 	{
-		echo "Pattern is ".AutoLoaderTester::returnPattern('VictoryCMS\FileUtils')."\n";
+		$pattern = AutoLoaderTester::returnPattern('VictoryCMS\FileUtils');
+		$pattern2 = AutoLoaderTester::returnPattern('\VictoryCMS\FileUtils');
+		
+		// Test valid matches
+		$fileNames = array(
+			'victorycms.fileutils.php', // all lower-case
+			'victorycms-fileutils.php',
+			'victorycms fileutils.php',
+			'victorycms...fileutils.php',
+			'victorycms--fileutils.php',
+			'victorycms 	 fileutils.php',
+			'VictoryCMS.FileUtils.php', // Matching case
+			'VictoryCMS-FileUtils.php',
+			'VictoryCMS FileUtils.php',
+			'VictoryCMS...FileUtils.php',
+			'VictoryCMS--FileUtils.php',
+			'VictoryCMS 	 FileUtils.php',
+			'victORYcms.fileuTiLs.php', // improper case
+			'victORYcms-fileuTiLs.php',
+			'victORYcms fileuTiLs.php',
+			'victORYcms...fileuTiLs.php',
+			'victORYcms--fileuTiLs.php',
+			'victORYcms 	 fileuTiLs.php',
+		);
+		
+		foreach ($fileNames as $fileName) {
+			$num = preg_match($pattern, $fileName);
+			$this->assertIdentical(1, $num);
+			$num = preg_match($pattern2, $fileName);
+			$this->assertIdentical(1, $num);
+		}
+		
+		// Test non-matching
+		$badNames = array(
+			'.victorycms.fileutils.php', // all lower-case
+			'.victorycms-fileutils.php',
+			'.victorycms fileutils.php',
+			'victorycmsfileutils.php',
+			'victorycms\fileutils.php',
+			'victorycms::fileutils.php',
+			'.VictoryCMS.FileUtils.php', // Matching case
+			'.VictoryCMS-FileUtils.php',
+			'.VictoryCMS FileUtils.php',
+			'VictoryCMSFileUtils.php',
+			'VictoryCMS\FileUtils.php',
+			'VictoryCMS::FileUtils.php'
+		);
+		
+		foreach ($badNames as $badName) {
+			$num = preg_match($pattern, $badName);
+			$this->assertIdentical(0, $num);
+			$num = preg_match($pattern2, $badName);
+			$this->assertIdentical(0, $num);
+		}
 	}
 	
 	public function testFlatDirLoad()
