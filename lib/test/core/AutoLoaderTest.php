@@ -19,15 +19,20 @@
 //  You should have received a copy of the GNU General Public License
 //  along with VictoryCMS.  If not, see <http://www.gnu.org/licenses/>.
 
-use VictoryCMS\RegistryKeys;
-use VictoryCMS\Registry;
-use VictoryCMS\AutoLoader;
+use Vcms\RegistryKeys;
+use Vcms\Registry;
+use Vcms\AutoLoader;
 
-class AutoLoaderTester extends AutoLoader
+class AutoLoaderMock extends AutoLoader
 {
 	public static function returnPattern($class)
 	{
 		return static::getPattern($class);
+	}
+	
+	protected static function loadDir($directory)
+	{
+		// Just so that we can test fake directories
 	}
 }
 
@@ -42,7 +47,7 @@ class AutoLoaderTest extends UnitTestCase
 	
 	public function setup()
 	{
-		AutoLoaderTester::getInstance();
+		AutoLoaderMock::getInstance();
 		
 		// get a temporary unique name
 		$tempName = tempnam(sys_get_temp_dir(), 'autoload_test');
@@ -76,7 +81,7 @@ class AutoLoaderTest extends UnitTestCase
 	public function testInstance()
 	{
 		$autoloader = AutoLoader::getInstance();
-		$this->assertIsA($autoloader, 'VictoryCMS\AutoLoader');
+		$this->assertIsA($autoloader, 'Vcms\AutoLoader');
 		$autoloader2 = $autoloader;
 		$this->assertReference($autoloader, $autoloader2, 'Copy refrences are different');
 	}
@@ -87,31 +92,31 @@ class AutoLoaderTest extends UnitTestCase
 		try {
 			$autoloader2 = clone $autoloader;
 			$this->fail('Did not throw an exception when cloning');
-		} catch (VictoryCMS\Exception\SingletonCopyException $e) {}
+		} catch (Vcms\Exception\SingletonCopyException $e) {}
 	}
 	
 	public function testAddListDirs()
 	{
-		// AutoLoader will not actually check the paths until they are used so we
+		// AutoLoaderMock will not actually check the paths here so we
 		// can add in paths that are not valid for testing
 		
 		// test after instantiation
 		$this->assertIdentical(array(), AutoLoader::listDirs());
 		
 		// Regular directory adding
-		AutoLoader::addDir('/1/2/3');
+		AutoLoaderMock::addDir('/1/2/3');
 		$this->assertIdentical(array('/1/2/3'), AutoLoader::listDirs());
 		$this->assertIdentical(array('/1/2/3'), Registry::get(RegistryKeys::autoload));
 		
-		AutoLoader::addDir('/4/5/6');
+		AutoLoaderMock::addDir('/4/5/6');
 		$this->assertIdentical(array('/1/2/3', '/4/5/6'), AutoLoader::listDirs());
 		$this->assertIdentical(array('/1/2/3', '/4/5/6'),
 			Registry::get(RegistryKeys::autoload)
 		);
 		
-		AutoLoader::addDir('/a/b/c');
-		AutoLoader::addDir('/d/e/f');
-		AutoLoader::addDir('/h/i/j');
+		AutoLoaderMock::addDir('/a/b/c');
+		AutoLoaderMock::addDir('/d/e/f');
+		AutoLoaderMock::addDir('/h/i/j');
 		$this->assertIdentical(
 			array('/1/2/3', '/4/5/6', '/a/b/c', '/d/e/f', '/h/i/j'),
 			AutoLoader::listDirs()
@@ -123,88 +128,95 @@ class AutoLoaderTest extends UnitTestCase
 		
 		// test bad directory
 		try {
-			AutoLoader::addDir(array('bad!'));
+			AutoLoaderMock::addDir(array('bad!'));
 			$this->fail("Should not be able to add an array.");
-		} catch (\VictoryCMS\Exception\DataTypeException $e) {}
+		} catch (\Vcms\Exception\DataTypeException $e) {}
 		
 		// test empty directory
 		try {
-			AutoLoader::addDir('');
+			AutoLoaderMock::addDir('');
 			$this->fail("Should not be able to add an empty string.");
-		} catch (\VictoryCMS\Exception\DataTypeException $e) {}
+		} catch (\Vcms\Exception\DataTypeException $e) {}
 	}
 	
 	public function testPattern()
 	{
 		$patterns = array(
-			AutoLoaderTester::returnPattern('VictoryCMS\FileUtils'),
-			AutoLoaderTester::returnPattern('\VictoryCMS\FileUtils')
+			AutoLoaderMock::returnPattern('Vcms\FileUtils'),
+			AutoLoaderMock::returnPattern('\Vcms\FileUtils')
 		);
 		
 		// Test valid matches
 		$fileNames = array(
-			'victorycms.fileutils.php', // all lower-case
-			'victorycms-fileutils.php',
-			'victorycms fileutils.php',
-			'victorycms...fileutils.php',
-			'victorycms--fileutils.php',
-			'victorycms 	 fileutils.php',
-			'VictoryCMS.FileUtils.php', // Matching case
-			'VictoryCMS-FileUtils.php',
-			'VictoryCMS FileUtils.php',
-			'VictoryCMS...FileUtils.php',
-			'VictoryCMS--FileUtils.php',
-			'VictoryCMS 	 FileUtils.php',
-			'victORYcms.fileuTiLs.php', // improper case
-			'victORYcms-fileuTiLs.php',
-			'victORYcms fileuTiLs.php',
-			'victORYcms...fileuTiLs.php',
-			'victORYcms--fileuTiLs.php',
-			'victORYcms 	 fileuTiLs.php'
+			'Vcms.fileutils', // all lower-case
+			'Vcms-fileutils',
+			'Vcms fileutils',
+			'Vcms...fileutils',
+			'Vcms--fileutils',
+			'Vcms 	 fileutils',
+			'Vcms.FileUtils', // Matching case
+			'Vcms-FileUtils',
+			'Vcms FileUtils',
+			'Vcms...FileUtils',
+			'Vcms--FileUtils',
+			'Vcms 	 FileUtils',
+			'Vcms.fileuTiLs', // improper case
+			'Vcms-fileuTiLs',
+			'Vcms fileuTiLs',
+			'Vcms...fileuTiLs',
+			'Vcms--fileuTiLs',
+			'Vcms 	 fileuTiLs'
 		);
 		
 		$upTo = count($fileNames);
 		for ($i = 0; $i < $upTo; $i++) {
 			// make even more valid combinations
 			array_push($fileNames, 'class.'.$fileNames[$i]);
-			array_push($fileNames, str_replace('.php', '.inc.php', $fileNames[$i]));
-			array_push($fileNames, 'class.'.str_replace('.php', '.inc.php', $fileNames[$i]));
-			array_push($fileNames, str_replace('.php', '.class.php', $fileNames[$i]));
-			array_push($fileNames, 'class.'.str_replace('.php', '.class.php', $fileNames[$i]));
-			array_push($fileNames, str_replace('.php', '.inc.class.php', $fileNames[$i]));
-			array_push($fileNames, 'class.'.str_replace('.php', '.inc.class.php', $fileNames[$i]));
+			array_push($fileNames, $fileNames[$i].'.inc');
+			array_push($fileNames, 'class.'.$fileNames[$i].'.inc');
+			array_push($fileNames, $fileNames[$i].'.class');
+			array_push($fileNames, 'class.'.$fileNames[$i].'.class');
+			array_push($fileNames, $fileNames[$i].'.inc.class');
+			array_push($fileNames, 'class.'.$fileNames[$i].'.inc.class');
+			array_push($fileNames, $fileNames[$i].'.class.inc');
+			array_push($fileNames, 'class.'.$fileNames[$i].'.class.inc');
 		}
 		
 		foreach ($fileNames as $fileName) {
-			echo "Matching: $fileName\n";
+			//echo "Matching: $fileName\n";
 			foreach($patterns as $pattern) {
 				$num = preg_match($pattern, $fileName);
-				$this->assertIdentical(1, $num);
+				$this->assertIdentical(1, $num, "Should match $fileName");
 			}
 		}
 		
 		// Test non-matching
 		$badNames = array(
-			'.victorycms.fileutils.php', // all lower-case
-			'.victorycms-fileutils.php',
-			'.victorycms fileutils.php',
-			'victorycmsfileutils.php',
-			'victorycms\fileutils.php',
-			'victorycms::fileutils.php',
-			'.VictoryCMS.FileUtils.php', // Matching case
-			'.VictoryCMS-FileUtils.php',
-			'.VictoryCMS FileUtils.php',
-			'VictoryCMSFileUtils.php',
-			'VictoryCMS\FileUtils.php',
-			'VictoryCMS::FileUtils.php'
+			'.Vcms.fileutils', // all lower-case
+			'.Vcms-fileutils',
+			'.Vcms fileutils',
+			'Vcmsfileutils',
+			'Vcms\fileutils',
+			'Vcms::fileutils',
+			'.Vcms.FileUtils', // Matching case
+			'.Vcms-FileUtils',
+			'.Vcms FileUtils',
+			'VcmsFileUtils',
+			'Vcms\FileUtils',
+			'Vcms::FileUtils'
 		);
 		
 	foreach ($badNames as $badName) {
 			foreach($patterns as $pattern) {
 				$num = preg_match($pattern, $badName);
-				$this->assertIdentical(0, $num);
+				$this->assertIdentical(0, $num, "Should not match $badName");
 			}
 		}
+	}
+	
+	public function testTruePath()
+	{
+		//TODO: implement me.
 	}
 	
 	public function testFlatDirLoad()
