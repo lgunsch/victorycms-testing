@@ -11,7 +11,7 @@ $libPath = $webRoot.'lib';
 
 require_once $webRoot.'lib'.DIRECTORY_SEPARATOR.'VictoryCMSTestRunner.php';
 
-use VictoryCMSTesting\VictoryCMSTestRunner;
+use VcmsTesting\VictoryCMSTestRunner;
 
 $testRunner = new VictoryCMSTestRunner($libPath, $appPath);
 $testRunner->run();

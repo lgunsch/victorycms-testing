@@ -1,5 +1,5 @@
 <?php
-namespace VictoryCMSTesting;
+namespace VcmsTesting;
 
 /**
  * Manages a map of class names to their paths

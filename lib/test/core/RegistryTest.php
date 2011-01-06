@@ -19,8 +19,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with VictoryCMS.  If not, see <http://www.gnu.org/licenses/>.
 
-use VictoryCMS\RegistryNode;
-use VictoryCMS\Registry;
+use Vcms\RegistryNode;
+use Vcms\Registry;
 
 class RegistryTest extends UnitTestCase
 {
@@ -32,7 +32,7 @@ class RegistryTest extends UnitTestCase
 	public function testInstance()
 	{
 		$reg = Registry::getInstance();
-		$this->assertIsA($reg, 'VictoryCMS\Registry');
+		$this->assertIsA($reg, 'Vcms\Registry');
 		$reg2 = $reg;
 		$this->assertReference($reg, $reg2, 'Copy refrences are different');
 	}
@@ -43,7 +43,7 @@ class RegistryTest extends UnitTestCase
 		try {
 			$reg2 = clone $reg;
 			$this->fail('Did not throw an exception when cloning');
-		} catch (VictoryCMS\Exception\SingletonCopyException $e) {}
+		} catch (Vcms\Exception\SingletonCopyException $e) {}
 	}
 	
 	public function testSetGet()
@@ -52,17 +52,17 @@ class RegistryTest extends UnitTestCase
 		try {
 			Registry::set(null, "value");
 			$this->fail();
-		} catch (\VictoryCMS\Exception\DataException $e) {}
+		} catch (\Vcms\Exception\DataException $e) {}
 		try {
 			Registry::set("key", null);
 			$this->fail();
-		} catch (\VictoryCMS\Exception\DataException $e) {}
+		} catch (\Vcms\Exception\DataException $e) {}
 		
 		/* test bad boolean */
 		try {
 			Registry::set("key", "string", array());
 			$this->fail();
-		} catch (\VictoryCMS\Exception\DataException $e) {}
+		} catch (\Vcms\Exception\DataException $e) {}
 		
 		/* Test regular setting and getting */
 		Registry::set("key", 5);
@@ -78,7 +78,7 @@ class RegistryTest extends UnitTestCase
 			Registry::set("test-set-get-key", 5, true);
 			Registry::set("test-set-get-key", 6);
 			$this->fail("Readonly key should not be overwritten!");
-		} catch (\VictoryCMS\Exception\OverwriteException $e) {}
+		} catch (\Vcms\Exception\OverwriteException $e) {}
 	}
 	
 	public function testAddGet()
@@ -87,17 +87,17 @@ class RegistryTest extends UnitTestCase
 		try {
 			Registry::add(null, "value");
 			$this->fail();
-		} catch (\VictoryCMS\Exception\DataException $e) {}
+		} catch (\Vcms\Exception\DataException $e) {}
 		try {
 			Registry::add("key", null);
 			$this->fail();
-		} catch (\VictoryCMS\Exception\DataException $e) {}
+		} catch (\Vcms\Exception\DataException $e) {}
 		
 		/* test bad boolean */
 		try {
 			Registry::add("key", "string", array());
 			$this->fail();
-		} catch (\VictoryCMS\Exception\DataException $e) {}
+		} catch (\Vcms\Exception\DataException $e) {}
 		
 		/* Test regular add and get */
 		$expected = array();
@@ -139,7 +139,7 @@ class RegistryTest extends UnitTestCase
 			Registry::add("test-add-get-key", 5, true);
 			Registry::add("test-add-get-key", 6);
 			$this->fail("Readonly key should not be overwritten!");
-		} catch (\VictoryCMS\Exception\OverwriteException $e) {}
+		} catch (\Vcms\Exception\OverwriteException $e) {}
 		try {
 			Registry::add("test-add-get-key-2", 5);
 			Registry::add("test-add-get-key-2", 6);
@@ -147,7 +147,7 @@ class RegistryTest extends UnitTestCase
 			Registry::add("test-add-get-key-2", 8, true);
 			Registry::add("test-add-get-key-2", 9);
 			$this->fail("Readonly key should not be overwritten!");
-		} catch (\VictoryCMS\Exception\OverwriteException $e) {}
+		} catch (\Vcms\Exception\OverwriteException $e) {}
 		
 	}
 	
@@ -159,13 +159,13 @@ class RegistryTest extends UnitTestCase
 		try {
 			Registry::attach(null, $obj);
 			$this->fail();
-		} catch (\VictoryCMS\Exception\DataException $e) {}
+		} catch (\Vcms\Exception\DataException $e) {}
 		
 		/* test bad boolean */
 		try {
 			Registry::attach("attach-key", $obj, array());
 			$this->fail();
-		} catch (\VictoryCMS\Exception\DataException $e) {}
+		} catch (\Vcms\Exception\DataException $e) {}
 		
 		/* Test attach and get */
 		Registry::attach('attach-key', $obj);
@@ -183,7 +183,7 @@ class RegistryTest extends UnitTestCase
 			Registry::attach('test-set-get-key', $str);
 			Registry::attach("test-set-get-key", new RegistryNode(null));
 			$this->fail("Readonly key should not be overwritten!");
-		} catch (\VictoryCMS\Exception\OverwriteException $e) {}
+		} catch (\Vcms\Exception\OverwriteException $e) {}
 	}
 	
 	public function testIsKey()
@@ -214,7 +214,7 @@ class RegistryTest extends UnitTestCase
 		try {
 			Registry::isReadOnly(null);
 			$this->fail('expected null key to throw exception');
-		} catch(\VictoryCMS\Exception\DataException $e) {}
+		} catch(\Vcms\Exception\DataException $e) {}
 	}
 	
 	public function testGet()
@@ -280,7 +280,7 @@ class RegistryTest extends UnitTestCase
 		} catch (\Exception $e) {}
 		try {
 			Registry::get("clear-key");
-		} catch(\VictoryCMS\Exception\OverwriteException $e) {
+		} catch(\Vcms\Exception\OverwriteException $e) {
 			$this->fail("Clearing of read-only key!");
 		}
 	}

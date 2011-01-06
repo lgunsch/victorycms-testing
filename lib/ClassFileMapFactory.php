@@ -1,5 +1,5 @@
 <?php
-namespace VictoryCMSTesting;
+namespace VcmsTesting;
 
 /**
  * Class to handle generating the class file map, and loading of classes

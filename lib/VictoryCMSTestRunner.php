@@ -20,7 +20,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with VictoryCMS.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace VictoryCMSTesting;
+namespace VcmsTesting;
 
 require_once 'ClassFileMapFactory.php';
 require_once 'ClassFileMap.php';
@@ -127,7 +127,7 @@ class VictoryCMSTestRunner
 	 */
 	protected function runTestGroupsByPath($testPath, $baseName)
 	{
-		$files = \VictoryCMS\FileUtils::findPHPFiles($testPath);
+		$files = \Vcms\FileUtils::findPHPFiles($testPath);
 		$testCases = $this->buildTestCaseArray($testPath, $baseName, $files);
 		
 		/* Run each set of test cases - each test suite is 1 directory */

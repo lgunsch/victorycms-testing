@@ -19,7 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with VictoryCMS.  If not, see <http://www.gnu.org/licenses/>.
 
-use VictoryCMS\RegistryNode;
+use Vcms\RegistryNode;
 
 class RegistryNodeTest extends UnitTestCase
 {
@@ -31,7 +31,7 @@ class RegistryNodeTest extends UnitTestCase
 	public function testInstance()
 	{
 		$node = new RegistryNode("value");
-		$this->assertIsA($node, '\VictoryCMS\RegistryNode');
+		$this->assertIsA($node, '\Vcms\RegistryNode');
 		
 		$node2 = $node;
 		$this->assertReference($node, $node2);
@@ -39,12 +39,12 @@ class RegistryNodeTest extends UnitTestCase
 		try {
 			$node = new RegistryNode("myval", null);
 			$this->fail("Cannot set read-only to null.");
-		} catch (\VictoryCMS\Exception\DataException $e) {}
+		} catch (\Vcms\Exception\DataException $e) {}
 		
 		try {
 			$node = new RegistryNode("myval", array());
 			$this->fail("Cannot set read-only to not a bool value.");
-		} catch (\VictoryCMS\Exception\DataException $e) {}
+		} catch (\Vcms\Exception\DataException $e) {}
 	}
 	
 	public function testSetGetValue()
@@ -96,14 +96,14 @@ class RegistryNodeTest extends UnitTestCase
 		try {
 			$node->setValue("myval");
 			$this->fail("Should not be able to set value of readonly node.");
-		} catch (\VictoryCMS\Exception\OverwriteException $e) {}
+		} catch (\Vcms\Exception\OverwriteException $e) {}
 		
 		$node = new RegistryNode("myval", true);
 		$this->assertTrue($node->isReadOnly());
 		try {
 			$node->setValue("myval");
 			$this->fail("Should not be able to set value of readonly node.");
-		} catch (\VictoryCMS\Exception\OverwriteException $e) {}
+		} catch (\Vcms\Exception\OverwriteException $e) {}
 		
 		$obj = array("my"=>'value');
 		$node = new RegistryNode(null);
@@ -113,6 +113,6 @@ class RegistryNodeTest extends UnitTestCase
 		try {
 			$node->setValue("myval");
 			$this->fail("Should not be able to set value of readonly node.");
-		} catch (\VictoryCMS\Exception\OverwriteException $e) {}
+		} catch (\Vcms\Exception\OverwriteException $e) {}
 	}
 }
