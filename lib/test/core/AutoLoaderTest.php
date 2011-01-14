@@ -45,6 +45,10 @@ class AutoLoaderTest extends UnitTestCase
 		parent::__construct('AutoLoader Test');
 	}
 	
+	/**
+	 * (non-PHPdoc)
+	 * @see SimpleTestCase::setup()
+	 */
 	public function setup()
 	{
 		AutoLoaderMock::getInstance();
@@ -70,6 +74,10 @@ class AutoLoaderTest extends UnitTestCase
 		$this->tempDir = $tempName;
 	}
 	
+	/**
+	 * (non-PHPdoc)
+	 * @see SimpleTestCase::tearDown()
+	 */
 	public function tearDown()
 	{
 		$result = rmdir($this->tempDir);
@@ -139,7 +147,10 @@ class AutoLoaderTest extends UnitTestCase
 		} catch (\Vcms\Exception\DataTypeException $e) {}
 	}
 	
-	public function testPattern()
+	/**
+	 * Test single namespace only pattern.
+	 */
+	public function testSinglePattern()
 	{
 		$patterns = array(
 			AutoLoaderMock::returnPattern('Vcms\FileUtils'),
@@ -148,28 +159,22 @@ class AutoLoaderTest extends UnitTestCase
 		
 		// Test valid matches
 		$fileNames = array(
-			'Vcms.fileutils', // all lower-case
-			'Vcms-fileutils',
-			'Vcms fileutils',
-			'Vcms...fileutils',
-			'Vcms--fileutils',
-			'Vcms 	 fileutils',
+			'vcms.fileutils', // all lower-case
+			'vcms-fileutils',
+			'vcms...fileutils',
+			'vcms--fileutils',
 			'Vcms.FileUtils', // Matching case
 			'Vcms-FileUtils',
-			'Vcms FileUtils',
 			'Vcms...FileUtils',
 			'Vcms--FileUtils',
-			'Vcms 	 FileUtils',
-			'Vcms.fileuTiLs', // improper case
-			'Vcms-fileuTiLs',
-			'Vcms fileuTiLs',
-			'Vcms...fileuTiLs',
-			'Vcms--fileuTiLs',
-			'Vcms 	 fileuTiLs'
+			'vCms.fileuTiLs', // improper case
+			'vCms-fileuTiLs',
+			'vCms...fileuTiLs',
+			'vCms--fileuTiLs',
 		);
 		
-		$upTo = count($fileNames);
-		for ($i = 0; $i < $upTo; $i++) {
+		$size = count($fileNames);
+		for ($i = 0; $i < $size; $i++) {
 			// make even more valid combinations
 			array_push($fileNames, 'class.'.$fileNames[$i]);
 			array_push($fileNames, $fileNames[$i].'.inc');
@@ -194,16 +199,96 @@ class AutoLoaderTest extends UnitTestCase
 		$badNames = array(
 			'.Vcms.fileutils', // all lower-case
 			'.Vcms-fileutils',
-			'.Vcms fileutils',
-			'Vcmsfileutils',
-			'Vcms\fileutils',
-			'Vcms::fileutils',
+			'vcmsfileutils',
+			'vcms\fileutils',
+			'vcms::fileutils',
+			'vcms_fileutils',
+			'vcms fileutils',
+			'vcms 	 fileutils',
 			'.Vcms.FileUtils', // Matching case
 			'.Vcms-FileUtils',
-			'.Vcms FileUtils',
 			'VcmsFileUtils',
 			'Vcms\FileUtils',
-			'Vcms::FileUtils'
+			'Vcms::FileUtils',
+			'Vcms_FileUtils',
+			'Vcms FileUtils',
+			'Vcms 	 FileUtils'
+		);
+		
+	foreach ($badNames as $badName) {
+			foreach($patterns as $pattern) {
+				$num = preg_match($pattern, $badName);
+				$this->assertIdentical(0, $num, "Should not match $badName");
+			}
+		}
+	}
+	
+	/**
+	 * Test multiple sub-namespace pattern.
+	 */
+	public function testMultiPattern()
+	{
+		$patterns = array(
+			AutoLoaderMock::returnPattern('Vcms\SubOne\SubTwo\FileUtils'),
+			AutoLoaderMock::returnPattern('\Vcms\SubOne\SubTwo\FileUtils')
+		);
+			
+		// Test valid matches
+		$fileNames = array(
+			'vcms.subone.subtwo.fileutils', // all lower-case
+			'vcms-subone-subtwo-fileutils',
+			'vcms...subone...subtwo...fileutils',
+			'vcms--subone--subtwo--fileutils',
+			'Vcms.SubOne.SubTwo.FileUtils', // Matching case
+			'Vcms-SubOne-SubTwo-FileUtils',
+			'Vcms...SubOne...SubTwo...FileUtils',
+			'Vcms--SubOne--SubTwo--FileUtils',
+			'vCms.sUboNe.sUbtWo.fileuTiLs', // improper case
+			'vCms-sUboNe-sUbtWo-fileuTiLs',
+			'vCms...sUboNe...sUbtWo...fileuTiLs',
+			'vCms--sUboNe--sUbtWo--fileuTiLs',
+		);
+		
+		$size = count($fileNames);
+		for ($i = 0; $i < $size; $i++) {
+			// make even more valid combinations
+			array_push($fileNames, 'class.'.$fileNames[$i]);
+			array_push($fileNames, $fileNames[$i].'.inc');
+			array_push($fileNames, 'class.'.$fileNames[$i].'.inc');
+			array_push($fileNames, $fileNames[$i].'.class');
+			array_push($fileNames, 'class.'.$fileNames[$i].'.class');
+			array_push($fileNames, $fileNames[$i].'.inc.class');
+			array_push($fileNames, 'class.'.$fileNames[$i].'.inc.class');
+			array_push($fileNames, $fileNames[$i].'.class.inc');
+			array_push($fileNames, 'class.'.$fileNames[$i].'.class.inc');
+		}
+		
+		foreach ($fileNames as $fileName) {
+			//echo "Matching: $fileName\n";
+			foreach($patterns as $pattern) {
+				$num = preg_match($pattern, $fileName);
+				$this->assertIdentical(1, $num, "Should match $fileName");
+			}
+		}
+		
+		// Test non-matching
+		$badNames = array(
+			'.Vcms.subone.subtwo.fileutils', // all lower-case
+			'.Vcms-subone-subtwo-fileutils',
+			'vcmssubonesubtwofileutils',
+			'vcms\subone\subtwo\fileutils',
+			'vcms::subone::subtwo::fileutils',
+			'vcms_subone_subtwo_fileutils',
+			'vcms subone subtwo fileutils',
+			'vcms   subone   subtwo	 fileutils',
+			'.Vcms.SubOne.SubTwo.FileUtils', // Matching case
+			'.Vcms-SubOne-SubTwo-FileUtils',
+			'VcmsSubOneSubTwoFileUtils',
+			'Vcms\SubOne\SubTwo\FileUtils',
+			'Vcms::SubOne::SubTwo::FileUtils',
+			'Vcms_SubOne_SubTwo_FileUtils',
+			'Vcms SubOne SubTwo FileUtils',
+			'Vcms 	SubOne 	SubTwo	 FileUtils'
 		);
 		
 	foreach ($badNames as $badName) {
@@ -216,7 +301,39 @@ class AutoLoaderTest extends UnitTestCase
 	
 	public function testTruePath()
 	{
-		//TODO: implement me.
+		$d = DIRECTORY_SEPARATOR;
+		
+		// test current working directory
+		$this->assertIdentical(getcwd(), AutoLoader::truepath(''));
+		
+		// test . correction
+		$this->assertIdentical(getcwd().$d.'a', AutoLoader::truepath('./a'));
+		$this->assertIdentical(getcwd(), AutoLoader::truepath('.'));
+		$this->assertIdentical(
+			$this->tempDir,
+			AutoLoader::truepath($this->tempDir.'/.')
+		);
+		$this->assertIdentical(
+			$d.'a'.$d.'b'.$d.'c.d',
+			AutoLoader::truepath('/a/b/c.d')
+		);
+		
+		// test .. correction
+		$this->assertIdentical(dirname(getcwd()), AutoLoader::truepath('..'));
+		$this->assertIdentical(
+			$this->tempDir,
+			AutoLoader::truepath($this->tempDir.'/a/..')
+		);
+		$this->assertIdentical(
+			$this->tempDir.$d.'b'.$d.'c',
+			AutoLoader::truepath($this->tempDir.'/a/../b/c/d/..')
+		);
+			
+		// test multiple directory separators
+		$this->assertIdentical(
+			$d.'a'.$d.'b'.$d.'c'.$d.'d',
+			AutoLoader::truepath('/a//b///c//d/')
+		);
 	}
 	
 	public function testFlatDirLoad()
