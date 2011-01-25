@@ -19,6 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with VictoryCMS.  If not, see <http://www.gnu.org/licenses/>.
 
+use Vcms\FileUtils;
 use Vcms\RegistryKeys;
 use Vcms\Registry;
 use Vcms\AutoLoader;
@@ -32,7 +33,17 @@ class AutoLoaderMock extends AutoLoader
 	
 	protected static function loadDir($directory)
 	{
-		// Just so that we can test fake directories
+		// Just so that we can test loading directories
+	}
+	
+	public static function clearInstance()
+	{
+		// Just so that we can remove the instance between tests.
+		static::$instance = null;
+		static::$directoryFiles = null;
+		if (Registry::isKey(RegistryKeys::autoload)) {
+			Registry::clear(RegistryKeys::autoload);
+		}
 	}
 }
 
@@ -52,7 +63,19 @@ class AutoLoaderTest extends UnitTestCase
 	public function setup()
 	{
 		AutoLoaderMock::getInstance();
-		
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see SimpleTestCase::tearDown()
+	 */
+	public function tearDown()
+	{
+		AutoLoaderMock::clearInstance();
+	}
+	
+	public function setupTempDir()
+	{
 		// get a temporary unique name
 		$tempName = tempnam(sys_get_temp_dir(), 'autoload_test');
 		if ($tempName === false) {
@@ -74,15 +97,11 @@ class AutoLoaderTest extends UnitTestCase
 		$this->tempDir = $tempName;
 	}
 	
-	/**
-	 * (non-PHPdoc)
-	 * @see SimpleTestCase::tearDown()
-	 */
-	public function tearDown()
+	public function removeTempDir()
 	{
 		$result = rmdir($this->tempDir);
 		if ($result === false) {
-			exit('Could not delete the temporary directory for testing.');
+			exit("Could not delete the temporary directory for testing.\n");
 		}
 	}
 	
@@ -105,32 +124,29 @@ class AutoLoaderTest extends UnitTestCase
 	
 	public function testAddListDirs()
 	{
-		// AutoLoaderMock will not actually check the paths here so we
-		// can add in paths that are not valid for testing
+		$this->setupTempDir();
+		
+		// AutoLoaderMock will check the paths here so we
+		// have to create valid directories
+		$top = $this->tempDir;
+		$path1 = AutoLoader::truepath($top.'/a');
+		$path2 = AutoLoader::truepath($top.'/b');
+		
+		$this->assertTrue(mkdir($path1, 0777, true));
+		$this->assertTrue(mkdir($path2, 0777, true));
 		
 		// test after instantiation
 		$this->assertIdentical(array(), AutoLoader::listDirs());
 		
 		// Regular directory adding
-		AutoLoaderMock::addDir('/1/2/3');
-		$this->assertIdentical(array('/1/2/3'), AutoLoader::listDirs());
-		$this->assertIdentical(array('/1/2/3'), Registry::get(RegistryKeys::autoload));
+		AutoLoaderMock::addDir($path1);
+		$this->assertIdentical(array($path1), AutoLoader::listDirs());
+		$this->assertIdentical(array($path1), Registry::get(RegistryKeys::autoload));
 		
-		AutoLoaderMock::addDir('/4/5/6');
-		$this->assertIdentical(array('/1/2/3', '/4/5/6'), AutoLoader::listDirs());
-		$this->assertIdentical(array('/1/2/3', '/4/5/6'),
-			Registry::get(RegistryKeys::autoload)
-		);
-		
-		AutoLoaderMock::addDir('/a/b/c');
-		AutoLoaderMock::addDir('/d/e/f');
-		AutoLoaderMock::addDir('/h/i/j');
+		AutoLoaderMock::addDir($path2);
+		$this->assertIdentical(array($path1, $path2), AutoLoader::listDirs());
 		$this->assertIdentical(
-			array('/1/2/3', '/4/5/6', '/a/b/c', '/d/e/f', '/h/i/j'),
-			AutoLoader::listDirs()
-		);
-		$this->assertIdentical(
-			array('/1/2/3', '/4/5/6', '/a/b/c', '/d/e/f', '/h/i/j'),
+			array($path1, $path2),
 			Registry::get(RegistryKeys::autoload)
 		);
 		
@@ -145,6 +161,10 @@ class AutoLoaderTest extends UnitTestCase
 			AutoLoaderMock::addDir('');
 			$this->fail("Should not be able to add an empty string.");
 		} catch (\Vcms\Exception\DataTypeException $e) {}
+		
+		$this->assertTrue(rmdir($path1));
+		$this->assertTrue(rmdir($path2));
+		$this->removeTempDir();
 	}
 	
 	/**
@@ -223,8 +243,8 @@ class AutoLoaderTest extends UnitTestCase
 		}
 	}
 	
-	/**
-	 * Test multiple sub-namespace pattern.
+	/*
+	 * Test multiple sub-namespace patterns.
 	 */
 	public function testMultiPattern()
 	{
@@ -336,17 +356,64 @@ class AutoLoaderTest extends UnitTestCase
 		);
 	}
 	
+	protected function setupAutoloader()
+	{
+		// Set up the autoloader
+		$autoloader = spl_autoload_register('\Vcms\AutoLoader::autoload');
+		if (! $autoloader) {
+			$this->fail('Could not attach the autoloader!');
+		}
+		
+		// Add in the temp directory path
+		AutoLoader::addDir($this->tempDir);
+	}
+	
+	/*
+	 * Writes out a simple PHP class to disk with the give class name and namespace
+	 * in the specified file path.
+	 */
+	protected function writePHPFile($namespace, $class, $filePath)
+	{
+		$phpClass = "<?php\n namespace {$namespace};\n class {$class} {}\n ?>";
+		if (file_put_contents($filePath, $phpClass, LOCK_EX) == false) {
+			$this->fail('Could not write test PHP file.');
+		}
+	}
+	
 	public function testFlatDirLoad()
 	{
-		//TODO: implement me.
+		$this->setupTempDir();
+		$this->setupAutoloader();
+		
+		// Create the class and test autoloading, remove the file once we are finished
+		$path = FileUtils::truepath($this->tempDir.'/vcms.testing.atest.php');
+		$this->writePHPFile('Vcms\Testing', 'ATest', $path);
+		$var = new \Vcms\Testing\ATest();
+		$this->assertTrue(unlink($path));
+		$this->removeTempDir();
 	}
 	
 	public function testMultiDirLoad()
 	{
-		//TODO: implement me.
+		$this->setupTempDir();
+		$this->setupAutoloader();
+		
+		// Create a few sub-folders
+		$dirPath = FileUtils::truepath($this->tempDir.'/a/b');
+		$this->assertTrue( mkdir($dirPath, 0777, true));
+		
+		// Create the class and test autoloading, remove the file once we are finished
+		$path = AutoLoader::truepath($dirPath.'/vcms.testing.atest.php');
+		$this->writePHPFile('Vcms\Testing', 'ATest', $path);
+		$var = new Vcms\Testing\ATest();
+		$this->assertTrue(unlink($path));
+		
+		$this->assertTrue(rmdir($dirPath));
+		$this->assertTrue(rmdir(dirname($dirPath)));
+		$this->removeTempDir();
 	}
 	
-	public function testNoCaseSensitive()
+	public function testDuplicateLoad()
 	{
 		//TODO: implement me.
 	}
