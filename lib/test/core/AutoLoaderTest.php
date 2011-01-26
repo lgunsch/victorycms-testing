@@ -412,9 +412,4 @@ class AutoLoaderTest extends UnitTestCase
 		$this->assertTrue(rmdir(dirname($dirPath)));
 		$this->removeTempDir();
 	}
-	
-	public function testDuplicateLoad()
-	{
-		//TODO: implement me.
-	}
 }
