@@ -22,13 +22,13 @@
 use Vcms\FileUtils;
 use Vcms\RegistryKeys;
 use Vcms\Registry;
-use Vcms\AutoLoader;
+use Vcms\Autoloader;
 
 /*
- * AutoLoaderMock extends the AutoLoader so that protetected methods can be fully
+ * AutoloaderMock extends the Autoloader so that protetected methods can be fully
  * tested.
  */
-class AutoLoaderMock extends AutoLoader
+class AutoloaderMock extends Autoloader
 {
 	/*
 	 * Returns the pattern produced by the protected method getPattern().
@@ -61,15 +61,15 @@ class AutoLoaderMock extends AutoLoader
 }
 
 /*
- * Unit test for fully testing the AutoLoader.
+ * Unit test for fully testing the autoloader.
  */
-class AutoLoaderTest extends UnitTestCase
+class AutoloaderTest extends UnitTestCase
 {
 	protected $tempDir;
 	
 	public function __construct()
 	{
-		parent::__construct('AutoLoader Test');
+		parent::__construct('Autoloader Test');
 	}
 	
 	/*
@@ -77,7 +77,7 @@ class AutoLoaderTest extends UnitTestCase
 	 */
 	public function setup()
 	{
-		AutoLoaderMock::getInstance();
+		AutoloaderMock::getInstance();
 	}
 	
 	/*
@@ -85,7 +85,7 @@ class AutoLoaderTest extends UnitTestCase
 	 */
 	public function tearDown()
 	{
-		AutoLoaderMock::clearInstance();
+		AutoloaderMock::clearInstance();
 	}
 	
 	/*
@@ -126,12 +126,12 @@ class AutoLoaderTest extends UnitTestCase
 	}
 	
 	/*
-	 * Test the creation of AutoLoader instances.
+	 * Test the creation of Autoloader instances.
 	 */
 	public function testInstance()
 	{
-		$autoloader = AutoLoader::getInstance();
-		$this->assertIsA($autoloader, 'Vcms\AutoLoader');
+		$autoloader = Autoloader::getInstance();
+		$this->assertIsA($autoloader, 'Vcms\Autoloader');
 		$autoloader2 = $autoloader;
 		$this->assertReference($autoloader, $autoloader2, 'Copy refrences are different');
 	}
@@ -141,7 +141,7 @@ class AutoLoaderTest extends UnitTestCase
 	 */
 	public function testClone()
 	{
-		$autoloader = AutoLoader::getInstance();
+		$autoloader = Autoloader::getInstance();
 		try {
 			$autoloader2 = clone $autoloader;
 			$this->fail('Did not throw an exception when cloning');
@@ -158,22 +158,22 @@ class AutoLoaderTest extends UnitTestCase
 		// AutoLoaderMock will check the paths here so we
 		// have to create valid directories
 		$top = $this->tempDir;
-		$path1 = AutoLoader::truepath($top.'/a');
-		$path2 = AutoLoader::truepath($top.'/b');
+		$path1 = Autoloader::truepath($top.'/a');
+		$path2 = Autoloader::truepath($top.'/b');
 		
 		$this->assertTrue(mkdir($path1, 0777, true));
 		$this->assertTrue(mkdir($path2, 0777, true));
 		
 		// test after instantiation
-		$this->assertIdentical(array(), AutoLoader::listDirs());
+		$this->assertIdentical(array(), Autoloader::listDirs());
 		
 		// Regular directory adding
-		AutoLoaderMock::addDir($path1);
-		$this->assertIdentical(array($path1), AutoLoader::listDirs());
+		AutoloaderMock::addDir($path1);
+		$this->assertIdentical(array($path1), Autoloader::listDirs());
 		$this->assertIdentical(array($path1), Registry::get(RegistryKeys::autoload));
 		
-		AutoLoaderMock::addDir($path2);
-		$this->assertIdentical(array($path1, $path2), AutoLoader::listDirs());
+		AutoloaderMock::addDir($path2);
+		$this->assertIdentical(array($path1, $path2), Autoloader::listDirs());
 		$this->assertIdentical(
 			array($path1, $path2),
 			Registry::get(RegistryKeys::autoload)
@@ -181,13 +181,13 @@ class AutoLoaderTest extends UnitTestCase
 		
 		// test bad directory
 		try {
-			AutoLoaderMock::addDir(array('bad!'));
+			AutoloaderMock::addDir(array('bad!'));
 			$this->fail("Should not be able to add an array.");
 		} catch (\Vcms\Exception\DataTypeException $e) {}
 		
 		// test empty directory
 		try {
-			AutoLoaderMock::addDir('');
+			AutoloaderMock::addDir('');
 			$this->fail("Should not be able to add an empty string.");
 		} catch (\Vcms\Exception\DataTypeException $e) {}
 		
@@ -202,8 +202,8 @@ class AutoLoaderTest extends UnitTestCase
 	public function testSinglePattern()
 	{
 		$patterns = array(
-			AutoLoaderMock::returnPattern('Vcms\FileUtils'),
-			AutoLoaderMock::returnPattern('\Vcms\FileUtils')
+			AutoloaderMock::returnPattern('Vcms\FileUtils'),
+			AutoloaderMock::returnPattern('\Vcms\FileUtils')
 		);
 		
 		// Test valid matches
@@ -278,8 +278,8 @@ class AutoLoaderTest extends UnitTestCase
 	public function testMultiPattern()
 	{
 		$patterns = array(
-			AutoLoaderMock::returnPattern('Vcms\SubOne\SubTwo\FileUtils'),
-			AutoLoaderMock::returnPattern('\Vcms\SubOne\SubTwo\FileUtils')
+			AutoloaderMock::returnPattern('Vcms\SubOne\SubTwo\FileUtils'),
+			AutoloaderMock::returnPattern('\Vcms\SubOne\SubTwo\FileUtils')
 		);
 			
 		// Test valid matches
@@ -356,35 +356,35 @@ class AutoLoaderTest extends UnitTestCase
 		$d = DIRECTORY_SEPARATOR;
 		
 		// test current working directory
-		$this->assertIdentical(getcwd(), AutoLoader::truepath(''));
+		$this->assertIdentical(getcwd(), Autoloader::truepath(''));
 		
 		// test . correction
-		$this->assertIdentical(getcwd().$d.'a', AutoLoader::truepath('./a'));
-		$this->assertIdentical(getcwd(), AutoLoader::truepath('.'));
+		$this->assertIdentical(getcwd().$d.'a', Autoloader::truepath('./a'));
+		$this->assertIdentical(getcwd(), Autoloader::truepath('.'));
 		$this->assertIdentical(
 			$this->tempDir,
-			AutoLoader::truepath($this->tempDir.'/.')
+			Autoloader::truepath($this->tempDir.'/.')
 		);
 		$this->assertIdentical(
 			$d.'a'.$d.'b'.$d.'c.d',
-			AutoLoader::truepath('/a/b/c.d')
+			Autoloader::truepath('/a/b/c.d')
 		);
 		
 		// test .. correction
-		$this->assertIdentical(dirname(getcwd()), AutoLoader::truepath('..'));
+		$this->assertIdentical(dirname(getcwd()), Autoloader::truepath('..'));
 		$this->assertIdentical(
 			$this->tempDir,
-			AutoLoader::truepath($this->tempDir.'/a/..')
+			Autoloader::truepath($this->tempDir.'/a/..')
 		);
 		$this->assertIdentical(
 			$this->tempDir.$d.'b'.$d.'c',
-			AutoLoader::truepath($this->tempDir.'/a/../b/c/d/..')
+			Autoloader::truepath($this->tempDir.'/a/../b/c/d/..')
 		);
 			
 		// test multiple directory separators
 		$this->assertIdentical(
 			$d.'a'.$d.'b'.$d.'c'.$d.'d',
-			AutoLoader::truepath('/a//b///c//d/')
+			Autoloader::truepath('/a//b///c//d/')
 		);
 	}
 	
@@ -394,13 +394,13 @@ class AutoLoaderTest extends UnitTestCase
 	protected function setupAutoloader()
 	{
 		// Set up the autoloader
-		$autoloader = spl_autoload_register('\Vcms\AutoLoader::autoload');
+		$autoloader = spl_autoload_register('\Vcms\Autoloader::autoload');
 		if (! $autoloader) {
 			$this->fail('Could not attach the autoloader!');
 		}
 		
 		// Add in the temp directory path
-		AutoLoader::addDir($this->tempDir);
+		Autoloader::addDir($this->tempDir);
 	}
 	
 	/*
@@ -446,7 +446,7 @@ class AutoLoaderTest extends UnitTestCase
 		$this->assertTrue(mkdir($dirPath, 0777, true));
 		
 		// Create the class and test autoloading, remove the file once we are finished
-		$path = AutoLoader::truepath($dirPath.'/vcms.testing.atest.php');
+		$path = Autoloader::truepath($dirPath.'/vcms.testing.atest.php');
 		$this->writePHPFile('Vcms\Testing', 'ATest', $path);
 		$var = new Vcms\Testing\ATest();
 		
