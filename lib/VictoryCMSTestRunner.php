@@ -22,9 +22,9 @@
 
 namespace VcmsTesting;
 
-require_once 'ClassFileMapFactory.php';
-require_once 'ClassFileMap.php';
-require_once 'ClassFileMapAutoloader.php';
+require_once 'VcmsTesting-ClassFileMapFactory.php';
+require_once 'VcmsTesting-ClassFileMap.php';
+require_once 'VcmsTesting-ClassFileMapAutoloader.php';
 
 /**
  * VictoryCMS testing environment main bootstrapping class; This is the entry point
