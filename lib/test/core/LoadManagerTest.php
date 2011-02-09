@@ -87,7 +87,7 @@ class LoadManagerTest extends UnitTestCase
 		fclose($handle1); 
 		fclose($handle2);
 		fclose($handle3);
-		unlink($config1); // delete temporary files
+		unlink($config1); 
 		unlink($config2);
 		unlink($config3);
 		
@@ -96,7 +96,7 @@ class LoadManagerTest extends UnitTestCase
 	public function testBadJson()
 	{
 		$loader = LoadManager::getInstance();
-		$config1 = tempnam("./", "config1"); // creates a temporary file
+		$config1 = tempnam("./", "config1"); 
 		$handle1 = fopen($config1, "w");
 		fwrite($handle1, "{\"load:\"$config2\"}"); // json missing a quotation
 		try{
@@ -110,6 +110,16 @@ class LoadManagerTest extends UnitTestCase
 	
 	public function testBadFilePath()
 	{
-		//TODO: implement me.
+		$loader = LoadManager::getInstance();
+		$config1 = tempnam("./", "config1"); 
+		$handle1 = fopen($config1, "w");
+		fwrite($handle1, "{\"load:\"".$config2."nonexisting\"}"); // non existing filepath
+		try{
+			LoadManager::load($config1);
+			$this->fail('Did not throw an exception with a configuration path.');
+		}
+		catch(Exception $e){}
+		fclose($handle1); 
+		unlink($config1); 
 	}
 }
