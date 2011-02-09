@@ -48,18 +48,22 @@ class LoadManagerTest extends UnitTestCase
 	public function testSingleLoad()
 	{
 		$loader = LoadManager::getInstance();
-		$config = tmpfile(); // creates a temporary file
-		fwrite($config, "{\"load\":\"./config2.json\"}");
-		$config2 = tmpfile();
-		fwrite($config, "{\"testing\":\"complete\"}");
+		$config1 = tempnam("./", "config1"); // creates a temporary file
+		$config2 = tempnam("./", "config2");
+		$handle1 = fopen($config1, "w");
+		$handle2 = fopen($config2, "w");
+		fwrite($handle1, "{\"load\":\"$config2\"}");
+		fwrite($handle2, "{\"testing\":\"complete\"}");
 		try{
-			LoadManager::load("config.json");
+			LoadManager::load($config1);
 		}
 		catch(Exception $e){
 			$this->fail('Threw an exception while loading a single config file.');
 		}
-		fclose($config); // closes and deletes temporary files
-		fclose($config);
+		fclose($handle1); 
+		fclose($handle2);
+		unlink($config1); // delete temporary files
+		unlink($config2);
 		
 	}
 	
