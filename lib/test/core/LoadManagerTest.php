@@ -95,7 +95,17 @@ class LoadManagerTest extends UnitTestCase
 	
 	public function testBadJson()
 	{
-		//TODO: implement me.
+		$loader = LoadManager::getInstance();
+		$config1 = tempnam("./", "config1"); // creates a temporary file
+		$handle1 = fopen($config1, "w");
+		fwrite($handle1, "{\"load:\"$config2\"}"); // json missing a quotation
+		try{
+			LoadManager::load($config1);
+			$this->fail('Did not throw an exception with a bad JSON file.');
+		}
+		catch(Exception $e){}
+		fclose($handle1); 
+		unlink($config1); 
 	}
 	
 	public function testBadFilePath()
