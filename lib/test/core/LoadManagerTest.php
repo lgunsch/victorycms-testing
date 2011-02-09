@@ -53,7 +53,7 @@ class LoadManagerTest extends UnitTestCase
 		$handle1 = fopen($config1, "w");
 		$handle2 = fopen($config2, "w");
 		fwrite($handle1, "{\"load\":\"$config2\"}");
-		fwrite($handle2, "{\"testing\":\"complete\"}");
+		fwrite($handle2, "{\"firstfile\":\"success\"}");
 		try{
 			LoadManager::load($config1);
 		}
@@ -62,14 +62,35 @@ class LoadManagerTest extends UnitTestCase
 		}
 		fclose($handle1); 
 		fclose($handle2);
-		unlink($config1); // delete temporary files
+		unlink($config1); 
 		unlink($config2);
-		
 	}
 	
 	public function testMultiLoad()
 	{
-		//TODO: implement me.
+		$loader = LoadManager::getInstance();
+		$config1 = tempnam("./", "config1"); 
+		$config2 = tempnam("./", "config2");
+		$config3 = tempnam("./", "config3");
+		$handle1 = fopen($config1, "w");
+		$handle2 = fopen($config2, "w");
+		$handle3 = fopen($config3, "w");
+		fwrite($handle1, "{\"load\":[\"$config2\",\"$config3\"]}");
+		fwrite($handle2, "{\"firstfile\":\"success\"}");
+		fwrite($handle3, "{\"secondfile\":\"success\"}");
+		try{
+			LoadManager::load($config1);
+		}
+		catch(Exception $e){
+			$this->fail('Threw an exception while loading multiple config files.');
+		}
+		fclose($handle1); 
+		fclose($handle2);
+		fclose($handle3);
+		unlink($config1); // delete temporary files
+		unlink($config2);
+		unlink($config3);
+		
 	}
 	
 	public function testBadJson()
