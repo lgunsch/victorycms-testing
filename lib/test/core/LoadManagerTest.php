@@ -19,7 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with VictoryCMS.  If not, see <http://www.gnu.org/licenses/>.
 
-use VictoryCMS\LoadManager;
+use Vcms\LoadManager;
 
 class LoadManagerTest extends UnitTestCase
 {
@@ -31,7 +31,7 @@ class LoadManagerTest extends UnitTestCase
 	public function testInstance()
 	{
 		$loader = LoadManager::getInstance();
-		$this->assertIsA($loader, 'VictoryCMS\LoadManager');
+		$this->assertIsA($loader, 'Vcms\LoadManager');
 		$loader2 = $loader;
 		$this->assertReference($loader, $loader2, 'Copy refrences are different');
 	}
@@ -42,12 +42,25 @@ class LoadManagerTest extends UnitTestCase
 		try {
 			$loader2 = clone $loader;
 			$this->fail('Did not throw an exception when cloning');
-		} catch (VictoryCMS\Exception\SingletonCopyException $e) {}
+		} catch (Vcms\Exception\SingletonCopyException $e) {}
 	}
 	
 	public function testSingleLoad()
 	{
-		//TODO: implement me.
+		$loader = LoadManager::getInstance();
+		$config = tmpfile(); // creates a temporary file
+		fwrite($config, "{\"load\":\"./config2.json\"}");
+		$config2 = tmpfile();
+		fwrite($config, "{\"testing\":\"complete\"}");
+		try{
+			LoadManager::load("config.json");
+		}
+		catch(Exception $e){
+			$this->fail('Threw an exception while loading a single config file.');
+		}
+		fclose($config); // closes and deletes temporary files
+		fclose($config);
+		
 	}
 	
 	public function testMultiLoad()
