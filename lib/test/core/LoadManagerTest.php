@@ -3,6 +3,7 @@
 //  VictoryCMS - Content managment system and framework.
 //
 //  Copyright (C) 2010  Lewis Gunsch <lgunsch@victorycms.org>
+//						Mitchell Bosecke <mitchellbosecke@gmail.com>
 //
 //  This file is part of VictoryCMS.
 //
@@ -20,6 +21,7 @@
 //  along with VictoryCMS.  If not, see <http://www.gnu.org/licenses/>.
 
 use Vcms\LoadManager;
+use Vcms\Registry;
 
 class LoadManagerTest extends UnitTestCase
 {
@@ -53,13 +55,24 @@ class LoadManagerTest extends UnitTestCase
 		$handle1 = fopen($config1, "w");
 		$handle2 = fopen($config2, "w");
 		fwrite($handle1, "{\"load\":\"$config2\"}");
-		fwrite($handle2, "{\"firstfile\":\"success\"}");
+		fwrite($handle2, "{
+							\"setting1\":\"success\",
+							\"setting2\":{
+									\"value\":\"success\",
+									\"readonly\":true
+								}
+							}");
 		try{
 			LoadManager::load($config1);
 		}
 		catch(Exception $e){
 			$this->fail('Threw an exception while loading a single config file.');
 		}
+		
+		/* Check that the correct values are actually being put in Registry */
+		$this->assertTrue(Registry::isReadOnly("setting2"),"Read only value not loading properly via LoadManager");
+		$value = Registry::get("setting2");
+		$this->assertEqual($value[0], "success", "Values are loading into Registry properly via LoadManager"); 
 		fclose($handle1); 
 		fclose($handle2);
 		unlink($config1); 
@@ -76,14 +89,16 @@ class LoadManagerTest extends UnitTestCase
 		$handle2 = fopen($config2, "w");
 		$handle3 = fopen($config3, "w");
 		fwrite($handle1, "{\"load\":[\"$config2\",\"$config3\"]}");
-		fwrite($handle2, "{\"firstfile\":\"success\"}");
-		fwrite($handle3, "{\"secondfile\":\"success\"}");
+		fwrite($handle2, "{\"firstfile\":\"success1\"}");
+		fwrite($handle3, "{\"secondfile\":\"success2\"}");
 		try{
 			LoadManager::load($config1);
 		}
 		catch(Exception $e){
 			$this->fail('Threw an exception while loading multiple config files.');
 		}
+		$value = Registry::get("secondfile");
+		$this->assertEqual($value[0], "success2", "Values are loading into Registry properly via LoadManager");
 		fclose($handle1); 
 		fclose($handle2);
 		fclose($handle3);
