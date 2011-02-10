@@ -2,8 +2,8 @@
 //
 //  VictoryCMS - Content managment system and framework.
 //
-//  Copyright (C) 2010  Lewis Gunsch <lgunsch@victorycms.org>
-//						Mitchell Bosecke <mitchellbosecke@gmail.com>
+//  Copyright (C) 2010,2011	Lewis Gunsch <lgunsch@victorycms.org>
+//  Copyright (C) 2010,2011	Mitchell Bosecke <mitchellbosecke@gmail.com>
 //
 //  This file is part of VictoryCMS.
 //
@@ -68,8 +68,7 @@ class LoadManagerTest extends UnitTestCase
 		catch(Exception $e){
 			$this->fail('Threw an exception while loading a single config file.');
 		}
-		
-		/* Check that the correct values are actually being put in Registry */
+		/* Check that the correct values of config2 are actually being put in Registry */
 		$this->assertTrue(Registry::isReadOnly("setting2"),"Read only value not loading properly via LoadManager");
 		$value = Registry::get("setting2");
 		$this->assertEqual($value[0], "success", "Values are loading into Registry properly via LoadManager"); 
