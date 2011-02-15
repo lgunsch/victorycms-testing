@@ -35,7 +35,11 @@ class LoadManagerTest extends UnitTestCase
 		$loader = LoadManager::getInstance();
 		$this->assertIsA($loader, 'Vcms\LoadManager');
 		$loader2 = $loader;
-		$this->assertReference($loader, $loader2, 'Copy refrences are different');
+		$this->assertReference(
+			$loader,
+			$loader2,
+			'Copy refrences are different'
+		);
 	}
 	
 	public function testClone()
@@ -50,6 +54,7 @@ class LoadManagerTest extends UnitTestCase
 	public function testSingleLoad()
 	{
 		$loader = LoadManager::getInstance();
+		
 		$config1 = tempnam("./", "config1"); // creates a temporary file
 		$config2 = tempnam("./", "config2");
 		$handle1 = fopen($config1, "w");
@@ -62,16 +67,23 @@ class LoadManagerTest extends UnitTestCase
 									\"readonly\":true
 								}
 							}");
-		try{
+		
+		try {
 			LoadManager::load($config1);
-		}
-		catch(Exception $e){
+		} catch(Exception $e) {
 			$this->fail('Threw an exception while loading a single config file.');
 		}
 		/* Check that the correct values of config2 are actually being put in Registry */
-		$this->assertTrue(Registry::isReadOnly("setting2"),"Read only value not loading properly via LoadManager");
+		$this->assertTrue(
+			Registry::isReadOnly("setting2"),
+			"Read only value not loading properly via LoadManager"
+		);
 		$value = Registry::get("setting2");
-		$this->assertEqual($value[0], "success", "Values are loading into Registry properly via LoadManager"); 
+		$this->assertEqual(
+			$value[0],
+			"success", "Values are loading into Registry properly via LoadManager"
+		);
+		
 		fclose($handle1); 
 		fclose($handle2);
 		unlink($config1); 
@@ -81,6 +93,7 @@ class LoadManagerTest extends UnitTestCase
 	public function testMultiLoad()
 	{
 		$loader = LoadManager::getInstance();
+		
 		$config1 = tempnam("./", "config1"); 
 		$config2 = tempnam("./", "config2");
 		$config3 = tempnam("./", "config3");
@@ -90,14 +103,20 @@ class LoadManagerTest extends UnitTestCase
 		fwrite($handle1, "{\"load\":[\"$config2\",\"$config3\"]}");
 		fwrite($handle2, "{\"firstfile\":\"success1\"}");
 		fwrite($handle3, "{\"secondfile\":\"success2\"}");
-		try{
+		
+		try {
 			LoadManager::load($config1);
-		}
-		catch(Exception $e){
+		} catch(Exception $e) {
 			$this->fail('Threw an exception while loading multiple config files.');
 		}
+		
 		$value = Registry::get("secondfile");
-		$this->assertEqual($value[0], "success2", "Values are loading into Registry properly via LoadManager");
+		
+		$this->assertEqual(
+			$value[0],
+			"success2", "Values are loading into Registry properly via LoadManager"
+		);
+		
 		fclose($handle1); 
 		fclose($handle2);
 		fclose($handle3);
@@ -110,14 +129,16 @@ class LoadManagerTest extends UnitTestCase
 	public function testBadJson()
 	{
 		$loader = LoadManager::getInstance();
+		
 		$config1 = tempnam("./", "config1"); 
 		$handle1 = fopen($config1, "w");
-		fwrite($handle1, "{\"load:\"$config2\"}"); // json missing a quotation
-		try{
+		fwrite($handle1, "{\"load:\"$config1\"}"); // json missing a quotation
+		
+		try {
 			LoadManager::load($config1);
 			$this->fail('Did not throw an exception with a bad JSON file.');
-		}
-		catch(Exception $e){}
+		} catch(Exception $e) {}
+		
 		fclose($handle1); 
 		unlink($config1); 
 	}
@@ -125,15 +146,47 @@ class LoadManagerTest extends UnitTestCase
 	public function testBadFilePath()
 	{
 		$loader = LoadManager::getInstance();
+		
 		$config1 = tempnam("./", "config1"); 
 		$handle1 = fopen($config1, "w");
-		fwrite($handle1, "{\"load:\"".$config2."nonexisting\"}"); // non existing filepath
+		fwrite($handle1, "{\"load:\"".$config1."nonexisting\"}"); // non existing filepath
+		
 		try{
 			LoadManager::load($config1);
 			$this->fail('Did not throw an exception with a configuration path.');
-		}
-		catch(Exception $e){}
+		} catch(Exception $e) {}
+		
 		fclose($handle1); 
 		unlink($config1); 
+	}
+	
+	public function testRecursiveLoad()
+	{
+		$loader = LoadManager::getInstance();
+		
+		$config1 = tempnam("./", "config1"); 
+		$config2 = tempnam("./", "config2");
+		$handle1 = fopen($config1, "w");
+		$handle2 = fopen($config2, "w");
+		fwrite($handle1, "{\"load\":[\"$config2\"], \"config1\":\"success1\"}");
+		fwrite($handle2, "{\"load\":[\"$config1\"], \"config2\":\"success2\"}");
+		
+		try {
+			LoadManager::load($config1);
+		} catch(Exception $e) {
+			$this->fail('Threw an exception while loading config files.');
+		}
+		
+		$value1 = Registry::get("config1");
+		$value2 = Registry::get("config2");
+		// this should not be an array since there is only one value
+		// recursive loading should not make it an array
+		$this->assertEqual($value1, "success1");
+		$this->assertEqual($value1, "success2");
+		
+		fclose($handle1); 
+		fclose($handle2);
+		unlink($config1); 
+		unlink($config2);
 	}
 }
