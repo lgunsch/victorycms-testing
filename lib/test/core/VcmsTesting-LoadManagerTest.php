@@ -23,6 +23,9 @@
 use Vcms\LoadManager;
 use Vcms\Registry;
 
+/*
+ * Unit test for fully testing the load manager.
+ */
 class LoadManagerTest extends UnitTestCase
 {
 	public function __construct()
@@ -30,6 +33,9 @@ class LoadManagerTest extends UnitTestCase
 		parent::__construct('LoadManager Test');
 	}
 	
+	/*
+	 * Test the creation of LoadManager instances.
+	 */
 	public function testInstance()
 	{
 		$loader = LoadManager::getInstance();
@@ -42,6 +48,9 @@ class LoadManagerTest extends UnitTestCase
 		);
 	}
 	
+	/*
+	 * Test throwing an exception when cloning a singleton.
+	 */
 	public function testClone()
 	{
 		$loader = LoadManager::getInstance();
@@ -51,6 +60,9 @@ class LoadManagerTest extends UnitTestCase
 		} catch (Vcms\Exception\SingletonCopyException $e) {}
 	}
 	
+	/*
+	 * Test loading a single configuration file.
+	 */
 	public function testSingleLoad()
 	{
 		$loader = LoadManager::getInstance();
@@ -73,7 +85,7 @@ class LoadManagerTest extends UnitTestCase
 		} catch(Exception $e) {
 			$this->fail('Threw an exception while loading a single config file.');
 		}
-		/* Check that the correct values of config2 are actually being put in Registry */
+		// Check that the correct values of config2 are actually being put in Registry
 		$this->assertTrue(
 			Registry::isReadOnly("setting2"),
 			"Read only value not loading properly via LoadManager"
@@ -90,6 +102,10 @@ class LoadManagerTest extends UnitTestCase
 		unlink($config2);
 	}
 	
+	/*
+	 * Test loading a configuration file which loads multiple other configuration
+	 * files.
+	 */
 	public function testMultiLoad()
 	{
 		$loader = LoadManager::getInstance();
@@ -123,9 +139,11 @@ class LoadManagerTest extends UnitTestCase
 		unlink($config1); 
 		unlink($config2);
 		unlink($config3);
-		
 	}
 	
+	/*
+	 * Test throwing an exception during loading a bad configuration file.
+	 */
 	public function testBadJson()
 	{
 		$loader = LoadManager::getInstance();
@@ -143,6 +161,9 @@ class LoadManagerTest extends UnitTestCase
 		unlink($config1); 
 	}
 	
+	/*
+	 * Test throwing an exception for a bad path to a configuration file.
+	 */
 	public function testBadFilePath()
 	{
 		$loader = LoadManager::getInstance();
@@ -160,6 +181,9 @@ class LoadManagerTest extends UnitTestCase
 		unlink($config1); 
 	}
 	
+	/*
+	 * Test loading configuration files which reference each other recursively.
+	 */
 	public function testRecursiveLoad()
 	{
 		$loader = LoadManager::getInstance();
