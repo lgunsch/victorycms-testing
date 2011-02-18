@@ -113,7 +113,7 @@ class LoadManagerTest extends UnitTestCase
 		$value = Registry::get("secondfile");
 		
 		$this->assertEqual(
-			$value[0],
+			$value,
 			"success2", "Values are loading into Registry properly via LoadManager"
 		);
 		
@@ -182,7 +182,7 @@ class LoadManagerTest extends UnitTestCase
 		// this should not be an array since there is only one value
 		// recursive loading should not make it an array
 		$this->assertEqual($value1, "success1");
-		$this->assertEqual($value1, "success2");
+		$this->assertEqual($value2, "success2");
 		
 		fclose($handle1); 
 		fclose($handle2);
