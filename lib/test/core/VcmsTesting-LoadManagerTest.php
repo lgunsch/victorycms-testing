@@ -191,28 +191,3 @@ class LoadManagerTest extends UnitTestCase
 	}
 }
 
-use Vcms\FileUtils;
-
-/*
- * Unit test for fully testing the LoadManager.
- */
-class LoadManagerTest extends UnitTestCase
-{
-	
-	public function __construct()
-	{
-		parent::__construct("LoadManager Test");
-	}
-	
-	/*
-	 * Test the creation of Autoloader instances.
-	 */
-	public function testInstance()
-	{
-		$loadManager = LoadManager::getInstance();
-		$this->assertIsA($loadManager, 'Vcms\LoadManager');
-		$loadManager2 = $loadManager;
-		$this->assertReference($loadManager, $loadManager2, 'Copy refrences are different');
-	}
-}
-
