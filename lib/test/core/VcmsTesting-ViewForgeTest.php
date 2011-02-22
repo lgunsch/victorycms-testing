@@ -77,6 +77,7 @@ class ViewForgeTest extends UnitTestCase
 		$response = ViewForge::forge($forgeSpec);
 		$this->assertIdentical($response->getStatusCode(), 0);
 		$this->assertIdentical($response->getStatusMessage(), "success");
+		$this->assertIdentical($response->getContentType(), "text/html");
 		$this->assertIdentical($response->getBody(), "12345");
 	}
 	
@@ -107,6 +108,7 @@ class ViewForgeTest extends UnitTestCase
 		$response = ViewForge::forge($forgeSpec);
 		$this->assertIdentical($response->getStatusCode(), 0);
 		$this->assertIdentical($response->getStatusMessage(), "success");
+		$this->assertIdentical($response->getContentType(), "text/html");
 		$this->assertIdentical($response->getBody(), "12345678910");
 	}
 	
@@ -152,10 +154,40 @@ class ViewForgeTest extends UnitTestCase
 		";
 		
 		try{
-			ViewForge::forge($forgeSpec);
+			$response = ViewForge::forge($forgeSpec);
 			$this->fail('Did not throw an exception with a malformed forgeSpec');
 		} catch(Exception $e){}
+	}
+	
+	public function testDifferentMimeTypes()
+	{
+		$forgeSpec = "
+			{
+					
+				\"objects\":[
+						{
+							\"name\":\"TestView\",
+							\"params\":{
+								\"test1\":[\"obj1\",\"obj2\"],
+								\"test2\":[\"obj3\",\"obj4\"]
+							}
+						},
+						{
+							\"name\":\"TestView3\",
+							\"params\":{
+								\"test1\":[\"obj1\",\"obj2\"],
+								\"test2\":[\"obj3\",\"obj4\"]
+							}
+						}
+				]
+			}
+			";
 		
+		$response = ViewForge::forge($forgeSpec);	
+		$this->assertIdentical($response->getStatusCode(), 1);
+		$this->assertIdentical($response->getStatusMessage(), "Content types do not match.");
+		$this->assertIdentical($response->getContentType(), null);
+		$this->assertIdentical($response->getBody(), "");
 	}
 
 	
