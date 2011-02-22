@@ -20,14 +20,21 @@
 //  You should have received a copy of the GNU General Public License
 //  along with VictoryCMS.  If not, see <http://www.gnu.org/licenses/>.
 
+use Vcms\RegistryKeys;
+use Vcms\FileUtils;
 use Vcms\ViewForge;
+use Vcms\Registry;
 
 class ViewForgeTest extends UnitTestCase
 {
 	public function __construct()
 	{
 		parent::__construct('ViewForge Test');
+		
+		/* Viewforge uses this key so it must be set before using it */
+		Registry::set(RegistryKeys::app_path, FileUtils::truepath(__DIR__."/../../../app/"));
 	}
+
 	
 	public function testInstance()
 	{
@@ -49,6 +56,108 @@ class ViewForgeTest extends UnitTestCase
 			$this->fail('Did not throw an exception when cloning');
 		} catch (Vcms\Exception\SingletonCopyException $e) {}
 	}
+	
+	public function testForge()
+	{	
+		$forgeSpec = "
+		{
+				
+			\"objects\":[
+					{
+						\"name\":\"TestView\",
+						\"params\":{
+							\"test1\":[\"obj1\",\"obj2\"],
+							\"test2\":[\"obj3\",\"obj4\"]
+						}
+					}
+			]
+		}
+		";
+		
+		$response = ViewForge::forge($forgeSpec);
+		$this->assertIdentical($response->getStatusCode(), 0);
+		$this->assertIdentical($response->getStatusMessage(), "success");
+		$this->assertIdentical($response->getBody(), "12345");
+	}
+	
+	public function testMultipleForge()
+	{
+		$forgeSpec = "
+		{
+				
+			\"objects\":[
+					{
+						\"name\":\"TestView\",
+						\"params\":{
+							\"test1\":[\"obj1\",\"obj2\"],
+							\"test2\":[\"obj3\",\"obj4\"]
+						}
+					},
+					{
+						\"name\":\"TestView2\",
+						\"params\":{
+							\"test1\":[\"obj1\",\"obj2\"],
+							\"test2\":[\"obj3\",\"obj4\"]
+						}
+					}
+			]
+		}
+		";
+		
+		$response = ViewForge::forge($forgeSpec);
+		$this->assertIdentical($response->getStatusCode(), 0);
+		$this->assertIdentical($response->getStatusMessage(), "success");
+		$this->assertIdentical($response->getBody(), "12345678910");
+	}
+	
+	public function testMalformedForgespec()
+	{
+		$forgeSpec = "
+		{
+				
+			\"objects\":[
+					{
+						\"badname\":\"TestView\",
+						\"params\":{
+							\"test1\":[\"obj1\",\"obj2\"],
+							\"test2\":[\"obj3\",\"obj4\"]
+						}
+					}
+			]
+		}
+		";
+		
+		try{
+			ViewForge::forge($forgeSpec);
+			$this->fail('Did not throw an exception with a malformed forgeSpec');
+		} catch(Exception $e){}
+		
+	}
+	
+	public function testMissingView()
+	{
+		$forgeSpec = "
+		{
+				
+			\"objects\":[
+					{
+						\"name\":\"NonExistingView\",
+						\"params\":{
+							\"test1\":[\"obj1\",\"obj2\"],
+							\"test2\":[\"obj3\",\"obj4\"]
+						}
+					}
+			]
+		}
+		";
+		
+		try{
+			ViewForge::forge($forgeSpec);
+			$this->fail('Did not throw an exception with a malformed forgeSpec');
+		} catch(Exception $e){}
+		
+	}
+
 	
 
 }
