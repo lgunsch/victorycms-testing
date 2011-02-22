@@ -187,7 +187,7 @@ class ViewForgeTest extends UnitTestCase
 		$this->assertIdentical($response->getStatusCode(), 1);
 		$this->assertIdentical($response->getStatusMessage(), "Content types do not match.");
 		$this->assertIdentical($response->getContentType(), null);
-		$this->assertIdentical($response->getBody(), "");
+		$this->assertIdentical($response->getBody(), null);
 	}
 
 	
