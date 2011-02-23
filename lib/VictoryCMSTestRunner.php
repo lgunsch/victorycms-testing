@@ -74,8 +74,9 @@ class VictoryCMSTestRunner extends VictoryCMS
 	 */
 	public function __construct($settings_path)
 	{
-		// Seed the registry and load in configuration settings
+		// Seed the registry and initialize the environment
 		static::seedRegistry($settings_path, true);
+		static::initialize();
 		
 		// instanciate a new auto loader
 		$this->autoLoader = new ClassFileMapAutoloader();
