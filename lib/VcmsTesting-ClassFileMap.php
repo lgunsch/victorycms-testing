@@ -1,5 +1,5 @@
 <?php
-namespace VcmsTesting;
+namespace Vcms;
 
 /**
  * Manages a map of class names to their paths

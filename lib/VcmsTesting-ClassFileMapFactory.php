@@ -1,5 +1,5 @@
 <?php
-namespace VcmsTesting;
+namespace Vcms;
 
 /**
  * Class to handle generating the class file map, and loading of classes
