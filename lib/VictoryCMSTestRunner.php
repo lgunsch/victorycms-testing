@@ -103,8 +103,9 @@ class VictoryCMSTestRunner extends VictoryCMS
 			exit('VictoryCMS could not attach the required testing autoloader!');
 		}
 		
-		// load in configuration file settings
+		// load in configuration file settings and any external libraries
 		static::load();
+		static::loadLibraries();
 		
 		// If the app path is set, configure it also
 		if (Registry::isKey(RegistryKeys::app_path)) {
