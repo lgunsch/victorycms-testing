@@ -20,11 +20,12 @@
 //  You should have received a copy of the GNU General Public License
 //  along with VictoryCMS.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace VcmsTesting;
+namespace Vcms;
 
-require_once 'VcmsTesting-ClassFileMapFactory.php';
-require_once 'VcmsTesting-ClassFileMap.php';
-require_once 'VcmsTesting-ClassFileMapAutoloader.php';
+require_once 'VictoryCMS.php';
+require_once 'Vcms-ClassFileMapFactory.php';
+require_once 'Vcms-ClassFileMap.php';
+require_once 'Vcms-ClassFileMapAutoloader.php';
 
 /**
  * VictoryCMS testing environment main bootstrapping class; This is the entry point
@@ -38,10 +39,10 @@ require_once 'VcmsTesting-ClassFileMapAutoloader.php';
  * 
  * Example: http://www.example.com/test/index.php
  * 
- * *Note*: This depends on *ClassFileMapAutoloader.php*, *ClassFileMap.php*, and
- * *ClassFileMapFactory.php* for dynamically building all the required object
- * during testing and interacting with VictoryCMS. This files should be located in
- * the same directory as VictoryCMSTestRunner.php.
+ * *Note*: This depends on *VictoryCMS.php*, *ClassFileMapAutoloader.php*,
+ * *ClassFileMap.php*, and *ClassFileMapFactory.php* for dynamically building all the
+ * required objects during testing and interacting with VictoryCMS. This files should
+ * be located in the same directory as VictoryCMSTestRunner.php.
  *
  * @author Lewis Gunsch
  * @author Andrew Crouse
@@ -51,7 +52,7 @@ require_once 'VcmsTesting-ClassFileMapAutoloader.php';
  * 
  * @see http://ajbrown.org/blog/2008/12/02/an-auto-loader-using-php-tokenizer.html
  */
-class VictoryCMSTestRunner
+class VictoryCMSTestRunner extends VictoryCMS
 {
 	/** A.J. Brown's dynamic tokenizing autoloader */
 	protected $autoLoader;
@@ -71,12 +72,20 @@ class VictoryCMSTestRunner
 	 * @param string $libPath should be a valid path to the VictoryCMS lib folder
 	 * @param string $appPath should be a valid path to the VictoryCMS app folder
 	 */
-	public function __construct($libPath, $appPath)
+	public function __construct($settings_path)
 	{
-		$this->libTestPath = $libPath.DIRECTORY_SEPARATOR.'test';
-		$this->appTestPath = $appPath.DIRECTORY_SEPARATOR.'test';
+		// Seed the registry and initialize the environment
+		static::seedRegistry($settings_path, true);
+		static::initialize();
 		
-		// Ensure sanity of the lib testing path
+		// instanciate a new auto loader
+		$this->autoLoader = new ClassFileMapAutoloader();
+		
+		// set the lib testing path
+		$libPath = Registry::get(RegistryKeys::lib_path);
+		$this->libTestPath = $libPath.DIRECTORY_SEPARATOR.'test';
+		
+		// ensure sanity of the lib testing path, which must exist
 		if (! is_dir($this->libTestPath)) {
 			throw new \Exception('The lib path '.$this->libTestPath.' path is not a directory!');
 		}
@@ -84,39 +93,49 @@ class VictoryCMSTestRunner
 			throw new \Exception('The lib path '.$this->libTestPath.' is not readable');
 		}
 		
-		// Ensure sanity of the app testing path
-		if (! is_dir($this->appTestPath)) {
-			throw new \Exception('The app path '.$this->appTestPath.' path is not a directory!');
-		}
-		if (! is_readable($this->appTestPath)) {
-			throw new \Exception('The app path '.$this->appTestPath.' is not readable');
-		}
-		
-		// build a class file map for VictoryCMS classes and testing classes
+		// build a class file map for VictoryCMS and add it to the autoloader
 		$libPathMap = ClassFileMapFactory::generate($libPath, "lib-map");
-		$appPathMap = ClassFileMapFactory::generate($appPath, "app-map");
- 		
-		// instanciate a new auto loader
-		$this->autoLoader = new ClassFileMapAutoloader();
- 
-		// add the class file maps to the autoloader
 		$this->autoLoader->addClassFileMap($libPathMap);
-		$this->autoLoader->addClassFileMap($appPathMap);
- 
+		
 		// register the autoloader
 		$registered = $this->autoLoader->registerAutoload();
 		if (! $registered) {
 			exit('VictoryCMS could not attach the required testing autoloader!');
+		}
+		
+		// load in configuration file settings
+		static::load();
+		
+		// If the app path is set, configure it also
+		if (Registry::isKey(RegistryKeys::app_path)) {
+			
+			// set the app testing path
+			$appPath = FileUtils::truepath(Registry::get(RegistryKeys::app_path));
+			$this->appTestPath = $appPath.DIRECTORY_SEPARATOR.'test';
+			
+			// ensure sanity of the app testing path
+			if (! is_dir($this->appTestPath)) {
+				throw new \Exception('The app path '.$this->appTestPath.' path is not a directory!');
+			}
+			if (! is_readable($this->appTestPath)) {
+				throw new \Exception('The app path '.$this->appTestPath.' is not readable');
+			}
+			
+			// build a class file map for the web application and add it to the autoloader
+			$appPathMap = ClassFileMapFactory::generate($appPath, "app-map");
+			$this->autoLoader->addClassFileMap($appPathMap);
 		}
 	}
 	
 	/**
 	 * Run the tests and report on the results.
 	 */
-	public function run()
+	public function test()
 	{
 		$this->runTestGroupsByPath($this->libTestPath, 'lib');
-		$this->runTestGroupsByPath($this->appTestPath, 'app');
+		if (isset($this->appTestPath)) {
+			$this->runTestGroupsByPath($this->appTestPath, 'app');
+		}
 	}
 	
 	/**
@@ -127,7 +146,7 @@ class VictoryCMSTestRunner
 	 */
 	protected function runTestGroupsByPath($testPath, $baseName)
 	{
-		$files = \Vcms\FileUtils::findPHPFiles($testPath);
+		$files = FileUtils::findPHPFiles($testPath);
 		$testCases = $this->buildTestCaseArray($testPath, $baseName, $files);
 		
 		/* Run each set of test cases - each test suite is 1 directory */
@@ -199,7 +218,8 @@ class VictoryCMSTestRunner
 				 */
 				$rfClass = new \ReflectionClass($class);
 				$constructor = $rfClass->getConstructor();
-				if (! ($constructor->isPrivate() || $constructor->isProtected())) {
+				
+				if ($constructor != null && ! ($constructor->isPrivate() || $constructor->isProtected())) {
 					$instance = new $class;
 					if ($instance instanceof \UnitTestCase) {
 						$test->addFile($path);

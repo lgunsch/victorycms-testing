@@ -1,5 +1,5 @@
 <?php
-namespace VcmsTesting;
+namespace Vcms;
 
 /**
  * Autoloads classes using class file maps

@@ -1,19 +1,19 @@
 <?php
 
 /* Should normally resolve to the web document root,
- * ./../../lib/VictoryCMSTestRunner.php or you can just set it to
- * "path/to/web_root/test_lib/VictoryCMSRunner.php"
+ * ./../../ or you can just set it to "path/to/web_root/"
  */
 $webRoot = ''.dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR;
 
-$appPath = $webRoot.'app';
-$libPath = $webRoot.'lib';
-
+/* Should normally resolve to the VictoryCMS test runner,
+ * ./../../lib/VictoryCMSTestRunner.php or you can just set it to
+ * "path/to/lib/VictoryCMSRunner.php"
+ */
 require_once $webRoot.'lib'.DIRECTORY_SEPARATOR.'VictoryCMSTestRunner.php';
 
-use VcmsTesting\VictoryCMSTestRunner;
+use Vcms\VictoryCMSTestRunner;
 
-$testRunner = new VictoryCMSTestRunner($libPath, $appPath);
-$testRunner->run();
+$testRunner = new VictoryCMSTestRunner($webRoot.'config.json');
+$testRunner->test();
 
 ?>
