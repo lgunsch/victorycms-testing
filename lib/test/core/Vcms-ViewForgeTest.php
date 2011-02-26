@@ -30,9 +30,6 @@ class ViewForgeTest extends UnitTestCase
 	public function __construct()
 	{
 		parent::__construct('ViewForge Test');
-		
-		/* Viewforge uses this key so it must be set before using it */
-		Registry::set(RegistryKeys::app_path, FileUtils::truepath(__DIR__."/../../../app/"));
 	}
 
 	
@@ -75,9 +72,9 @@ class ViewForgeTest extends UnitTestCase
 		";
 		
 		$response = ViewForge::forge($forgeSpec);
-		$this->assertIdentical($response->getStatusCode(), 0);
-		$this->assertIdentical($response->getStatusMessage(), "success");
-		$this->assertIdentical($response->getContentType(), "text/html");
+		$this->assertIdentical($response->getStatusCode(), 200);
+		$this->assertIdentical($response->getStatusMessage(), "OK");
+		$this->assertIdentical($response->getContentType(), "text/html; charset=utf-8");
 		$this->assertIdentical($response->getBody(), "12345");
 	}
 	
@@ -106,9 +103,9 @@ class ViewForgeTest extends UnitTestCase
 		";
 		
 		$response = ViewForge::forge($forgeSpec);
-		$this->assertIdentical($response->getStatusCode(), 0);
-		$this->assertIdentical($response->getStatusMessage(), "success");
-		$this->assertIdentical($response->getContentType(), "text/html");
+		$this->assertIdentical($response->getStatusCode(), 200);
+		$this->assertIdentical($response->getStatusMessage(), "OK");
+		$this->assertIdentical($response->getContentType(), "text/html; charset=utf-8");
 		$this->assertIdentical($response->getBody(), "12345678910");
 	}
 	
@@ -155,7 +152,7 @@ class ViewForgeTest extends UnitTestCase
 		
 		try{
 			$response = ViewForge::forge($forgeSpec);
-			$this->fail('Did not throw an exception with a malformed forgeSpec');
+			$this->fail('Did not throw an exception with a non existing view');
 		} catch(Exception $e){}
 	}
 	
@@ -184,8 +181,8 @@ class ViewForgeTest extends UnitTestCase
 			";
 		
 		$response = ViewForge::forge($forgeSpec);	
-		$this->assertIdentical($response->getStatusCode(), 1);
-		$this->assertIdentical($response->getStatusMessage(), "Content types do not match.");
+		$this->assertIdentical($response->getStatusCode(), 500);
+		$this->assertIdentical($response->getStatusMessage(), "Internal Server Error");
 		$this->assertIdentical($response->getContentType(), null);
 		$this->assertIdentical($response->getBody(), null);
 	}

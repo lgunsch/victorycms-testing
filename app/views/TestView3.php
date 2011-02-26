@@ -5,7 +5,9 @@ use Vcms\CssView;
 
 class TestView3 extends CssView
 {
-	public function render($params){
+	public function __construct($params){
+	}
+	public function render(){
 	}
 	public function getBody(){
 	}
