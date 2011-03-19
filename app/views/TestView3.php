@@ -9,8 +9,6 @@ class TestView3 extends CssView
 	}
 	public function render(){
 	}
-	public function getBody(){
-	}
 	public function isCacheable(){
 	}
 

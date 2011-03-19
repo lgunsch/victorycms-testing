@@ -150,10 +150,11 @@ class ViewForgeTest extends UnitTestCase
 		}
 		";
 		
-		try{
-			$response = ViewForge::forge($forgeSpec);
-			$this->fail('Did not throw an exception with a non existing view');
-		} catch(Exception $e){}
+		$response = ViewForge::forge($forgeSpec);
+		$this->assertIdentical($response->getStatusCode(), 404);
+		$this->assertIdentical($response->getStatusMessage(), "Not Found");
+		$this->assertIdentical($response->getContentType(), null);
+		$this->assertIdentical($response->getBody(), null);
 	}
 	
 	public function testDifferentMimeTypes()
