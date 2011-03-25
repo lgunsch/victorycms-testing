@@ -87,10 +87,14 @@ class VictoryCMSTestRunner extends VictoryCMS
 		
 		// ensure sanity of the lib testing path, which must exist
 		if (! is_dir($this->libTestPath)) {
-			throw new \Exception('The lib path '.$this->libTestPath.' path is not a directory!');
+			echo "The lib/test directory is missing from the lib/ directory.\n";
+			echo "You should create the directory lib/test.\n";
+			exit();
+			
 		}
 		if (! is_readable($this->libTestPath)) {
-			throw new \Exception('The lib path '.$this->libTestPath.' is not readable');
+			echo "The lib path '.$this->libTestPath.' is not readable.\n";
+			exit();
 		}
 		
 		// build a class file map for VictoryCMS and add it to the autoloader
@@ -116,10 +120,13 @@ class VictoryCMSTestRunner extends VictoryCMS
 			
 			// ensure sanity of the app testing path
 			if (! is_dir($this->appTestPath)) {
-				throw new \Exception('The app path '.$this->appTestPath.' path is not a directory!');
+				echo "The app/test directory is missing from the app/ directory.\n";
+				echo "You should create the directory app/test.\n";
+				exit();
 			}
 			if (! is_readable($this->appTestPath)) {
-				throw new \Exception('The app path '.$this->appTestPath.' is not readable');
+				echo "The app path '.$this->appTestPath.' is not readable.\n";
+				exit();
 			}
 			
 			// build a class file map for the web application and add it to the autoloader
