@@ -54,8 +54,8 @@ class AutoloaderMock extends Autoloader
 		// Just so that we can remove the instance between tests.
 		static::$instance = null;
 		static::$directoryFiles = null;
-		if (Registry::isKey(RegistryKeys::autoload)) {
-			Registry::clear(RegistryKeys::autoload);
+		if (Registry::isKey(RegistryKeys::AUTOLOAD)) {
+			Registry::clear(RegistryKeys::AUTOLOAD);
 		}
 	}
 }
@@ -170,13 +170,13 @@ class AutoloaderTest extends UnitTestCase
 		// Regular directory adding
 		AutoloaderMock::addDir($path1);
 		$this->assertIdentical(array($path1), Autoloader::listDirs());
-		$this->assertIdentical(array($path1), Registry::get(RegistryKeys::autoload));
+		$this->assertIdentical(array($path1), Registry::get(RegistryKeys::AUTOLOAD));
 		
 		AutoloaderMock::addDir($path2);
 		$this->assertIdentical(array($path1, $path2), Autoloader::listDirs());
 		$this->assertIdentical(
 			array($path1, $path2),
-			Registry::get(RegistryKeys::autoload)
+			Registry::get(RegistryKeys::AUTOLOAD)
 		);
 		
 		// test bad directory

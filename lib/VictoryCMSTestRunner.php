@@ -82,7 +82,7 @@ class VictoryCMSTestRunner extends VictoryCMS
 		$this->autoLoader = new ClassFileMapAutoloader();
 		
 		// set the lib testing path
-		$libPath = Registry::get(RegistryKeys::lib_path);
+		$libPath = Registry::get(RegistryKeys::LIB_PATH);
 		$this->libTestPath = $libPath.DIRECTORY_SEPARATOR.'test';
 		
 		// ensure sanity of the lib testing path, which must exist
@@ -112,10 +112,10 @@ class VictoryCMSTestRunner extends VictoryCMS
 		static::loadLibraries();
 		
 		// If the app path is set, configure it also
-		if (Registry::isKey(RegistryKeys::app_path)) {
+		if (Registry::isKey(RegistryKeys::APP_PATH)) {
 			
 			// set the app testing path
-			$appPath = FileUtils::truepath(Registry::get(RegistryKeys::app_path));
+			$appPath = FileUtils::truepath(Registry::get(RegistryKeys::APP_PATH));
 			$this->appTestPath = $appPath.DIRECTORY_SEPARATOR.'test';
 			
 			// ensure sanity of the app testing path
