@@ -28,7 +28,7 @@ class RegistryTest extends UnitTestCase
 	{
 		parent::__construct('Registry Test');
 	}
-	
+
 	public function testInstance()
 	{
 		$reg = Registry::getInstance();
@@ -36,34 +36,34 @@ class RegistryTest extends UnitTestCase
 		$reg2 = $reg;
 		$this->assertReference($reg, $reg2, 'Copy refrences are different');
 	}
-	
+
 	public function testClone()
 	{
 		$reg = Registry::getInstance();
 		try {
 			$reg2 = clone $reg;
 			$this->fail('Did not throw an exception when cloning');
-		} catch (Vcms\Exception\SingletonCopyException $e) {}
+		} catch (Vcms\Exception\SingletonCopy $e) {}
 	}
-	
+
 	public function testSetGet()
 	{
 		/* Test null binding and value exceptions */
 		try {
 			Registry::set(null, "value");
 			$this->fail();
-		} catch (\Vcms\Exception\DataException $e) {}
+		} catch (\Vcms\Exception\InvalidValue $e) {}
 		try {
 			Registry::set("key", null);
 			$this->fail();
-		} catch (\Vcms\Exception\DataException $e) {}
-		
+		} catch (\Vcms\Exception\InvalidValue $e) {}
+
 		/* test bad boolean */
 		try {
 			Registry::set("key", "string", array());
 			$this->fail();
-		} catch (\Vcms\Exception\DataException $e) {}
-		
+		} catch (\Vcms\Exception\InvalidType $e) {}
+
 		/* Test regular setting and getting */
 		Registry::set("key", 5);
 		$this->assertIdentical(5, Registry::get("key"));
@@ -72,33 +72,33 @@ class RegistryTest extends UnitTestCase
 		$val = array('me1', "me2", "me3");
 		Registry::set("key", $val);
 		$this->assertIdentical($val, Registry::get('key'));
-		
+
 		/* Test overwritting */
 		try {
 			Registry::set("test-set-get-key", 5, true);
 			Registry::set("test-set-get-key", 6);
 			$this->fail("Readonly key should not be overwritten!");
-		} catch (\Vcms\Exception\OverwriteException $e) {}
+		} catch (\Vcms\Exception\Overwrite $e) {}
 	}
-	
+
 	public function testAddGet()
 	{
 		/* Test null binding and value */
 		try {
 			Registry::add(null, "value");
 			$this->fail();
-		} catch (\Vcms\Exception\DataException $e) {}
+		} catch (\Vcms\Exception\InvalidValue $e) {}
 		try {
 			Registry::add("key", null);
 			$this->fail();
-		} catch (\Vcms\Exception\DataException $e) {}
-		
+		} catch (\Vcms\Exception\InvalidValue $e) {}
+
 		/* test bad boolean */
 		try {
 			Registry::add("key", "string", array());
 			$this->fail();
-		} catch (\Vcms\Exception\DataException $e) {}
-		
+		} catch (\Vcms\Exception\InvalidType $e) {}
+
 		/* Test regular add and get */
 		$expected = array();
 		Registry::clear("key");
@@ -112,7 +112,7 @@ class RegistryTest extends UnitTestCase
 		Registry::add("key", $val);
 		array_push($expected, "me1", "me2", "me3");
 		$this->assertIdentical($expected, Registry::get('key'));
-		
+
 		/* Test array add and get, and properly merging */
 		$expected = array("one"=>1, "two"=>2);
 		Registry::clear("key");
@@ -133,13 +133,13 @@ class RegistryTest extends UnitTestCase
 		$expected["three"] = 3;
 		$expected["four"] = 4;
 		$this->assertIdentical($expected, Registry::get('key'));
-		
+
 		/* test overwritting */
 		try {
 			Registry::add("test-add-get-key", 5, true);
 			Registry::add("test-add-get-key", 6);
 			$this->fail("Readonly key should not be overwritten!");
-		} catch (\Vcms\Exception\OverwriteException $e) {}
+		} catch (\Vcms\Exception\Overwrite $e) {}
 		try {
 			Registry::add("test-add-get-key-2", 5);
 			Registry::add("test-add-get-key-2", 6);
@@ -147,45 +147,45 @@ class RegistryTest extends UnitTestCase
 			Registry::add("test-add-get-key-2", 8, true);
 			Registry::add("test-add-get-key-2", 9);
 			$this->fail("Readonly key should not be overwritten!");
-		} catch (\Vcms\Exception\OverwriteException $e) {}
-		
+		} catch (\Vcms\Exception\Overwrite $e) {}
+
 	}
-	
+
 	public function testAttachGet()
 	{
 		$obj = new RegistryNode("value");
-		
+
 		/* Test null binding and value */
 		try {
 			Registry::attach(null, $obj);
 			$this->fail();
-		} catch (\Vcms\Exception\DataException $e) {}
-		
+		} catch (\Vcms\Exception\InvalidValue $e) {}
+
 		/* test bad boolean */
 		try {
 			Registry::attach("attach-key", $obj, array());
 			$this->fail();
-		} catch (\Vcms\Exception\DataException $e) {}
-		
+		} catch (\Vcms\Exception\InvalidType $e) {}
+
 		/* Test attach and get */
 		Registry::attach('attach-key', $obj);
 		$this->assertIdentical(Registry::get('attach-key'), $obj);
 		Registry::clear('attach-key');
-		
+
 		$val = array('me1', "me2", "me3");
 		Registry::attach("attach-key", $val);
 		array_push($val, "me4", "me5", "me6");
 		$this->assertIdentical($val, Registry::get('attach-key'));
-		
+
 		/* Test overwritting */
 		try {
 			$str = 'myStringValue';
 			Registry::attach('test-set-get-key', $str);
 			Registry::attach("test-set-get-key", new RegistryNode(null));
 			$this->fail("Readonly key should not be overwritten!");
-		} catch (\Vcms\Exception\OverwriteException $e) {}
+		} catch (\Vcms\Exception\Overwrite $e) {}
 	}
-	
+
 	public function testIsKey()
 	{
 		$this->assertFalse(Registry::isKey(null));
@@ -196,7 +196,7 @@ class RegistryTest extends UnitTestCase
 		Registry::clear('is-key');
 		$this->assertFalse(Registry::isKey('is-key'));
 	}
-	
+
 	public function testIsReadOnly()
 	{
 		Registry::set('read-only', 1, true);
@@ -205,7 +205,7 @@ class RegistryTest extends UnitTestCase
 		$this->assertFalse(Registry::isReadOnly('not-read-only'));
 		Registry::set('read-only-2', 1);
 		$this->assertFalse(Registry::isReadOnly('read-only-2'));
-		
+
 		/* Test bad key's */
 		try {
 			Registry::isReadOnly("my-random-bad-key");
@@ -214,9 +214,9 @@ class RegistryTest extends UnitTestCase
 		try {
 			Registry::isReadOnly(null);
 			$this->fail('expected null key to throw exception');
-		} catch(\Vcms\Exception\DataException $e) {}
+		} catch(\Vcms\Exception\InvalidValue $e) {}
 	}
-	
+
 	public function testGet()
 	{
 		/* Test bad get key's */
@@ -228,7 +228,7 @@ class RegistryTest extends UnitTestCase
 			Registry::get(null);
 			$this->fail('expected null key to throw exception');
 		} catch(\Exception $e) {}
-		
+
 		/* Test singular get */
 		Registry::clear("key");
 		Registry::set("key", 5);
@@ -237,7 +237,7 @@ class RegistryTest extends UnitTestCase
 		$this->assertIdentical("string", Registry::get("key"));
 		Registry::set('key', true);
 		$this->assertIdentical(Registry::get('key'), true);
-		
+
 		/* Test multi-value get */
 		$expected = array("one"=>1, "two"=>2, "three"=>3, "four"=>4);
 		Registry::clear("key");
@@ -246,9 +246,9 @@ class RegistryTest extends UnitTestCase
 		$val = array('me1', "me2", "me3");
 		Registry::set("key", $val);
 		$this->assertIdentical($val, Registry::get('key'));
-		
+
 	}
-	
+
 	public function testClear()
 	{
 		/* clear non-existant key */
@@ -256,13 +256,13 @@ class RegistryTest extends UnitTestCase
 			Registry::clear("random-bad-key");
 			$this->fail('expected unknown key to throw exception');
 		} catch(\Exception $e) {}
-		
+
 		/* clear null */
 		try {
 			Registry::clear(null);
 			$this->fail('expected null key to throw exception');
 		} catch(\Exception $e) {}
-		
+
 		/* regular clear */
 		Registry::set("clear-key", 5);
 		$this->assertTrue(Registry::clear("clear-key"));
@@ -271,7 +271,7 @@ class RegistryTest extends UnitTestCase
 			Registry::get("clear-key");
 			$this->fail("Key was not cleared!");
 		} catch (\Exception $e) {}
-		
+
 		/* clear a read-only key-value binding */
 		try {
 			Registry::set("clear-key", 5, true);
@@ -280,7 +280,7 @@ class RegistryTest extends UnitTestCase
 		} catch (\Exception $e) {}
 		try {
 			Registry::get("clear-key");
-		} catch(\Vcms\Exception\OverwriteException $e) {
+		} catch(\Vcms\Exception\Overwrite $e) {
 			$this->fail("Clearing of read-only key!");
 		}
 	}

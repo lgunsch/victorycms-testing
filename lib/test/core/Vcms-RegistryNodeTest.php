@@ -27,40 +27,40 @@ class RegistryNodeTest extends UnitTestCase
 	{
 		parent::__construct("Registry Node Test");
 	}
-	
+
 	public function testInstance()
 	{
 		$node = new RegistryNode("value");
 		$this->assertIsA($node, '\Vcms\RegistryNode');
-		
+
 		$node2 = $node;
 		$this->assertReference($node, $node2);
-		
+
 		try {
 			$node = new RegistryNode("myval", null);
 			$this->fail("Cannot set read-only to null.");
-		} catch (\Vcms\Exception\DataException $e) {}
-		
+		} catch (\Vcms\Exception\InvalidType $e) {}
+
 		try {
 			$node = new RegistryNode("myval", array());
 			$this->fail("Cannot set read-only to not a bool value.");
-		} catch (\Vcms\Exception\DataException $e) {}
+		} catch (\Vcms\Exception\InvalidType $e) {}
 	}
-	
+
 	public function testSetGetValue()
 	{
 		$node = new RegistryNode("myval");
 		$node->setValue("myval");
 		$this->assertIdentical($node->getValue(), "myval");
-		
+
 		$node = new RegistryNode(array("my_array", 2, "three"=>3));
 		$this->assertIdentical($node->getValue(), array("my_array", 2, "three"=>3));
-		
+
 		$obj = new RegistryNode('val');
 		$node = new RegistryNode($obj);
 		$this->assertIdentical($node->getValue(), $obj);
 	}
-	
+
 	public function testAttachGetValue()
 	{
 		$str = "myValue";
@@ -70,7 +70,7 @@ class RegistryNodeTest extends UnitTestCase
 		// this seems to not work as exptected
 		//$this->assertReference($str, $node->getValue());
 		$this->assertIdentical($str, $node->getValue());
-		
+
 		$arr = array("my_array", 2, "three"=>3);
 		$node = new RegistryNode(null);
 		$node->setAttachedValue($arr);
@@ -78,7 +78,7 @@ class RegistryNodeTest extends UnitTestCase
 		// this seems to not work as exptected
 		//$this->assertReference($arr, $node->getValue());
 		$this->assertIdentical($arr, $node->getValue());
-		
+
 		$obj = new RegistryNode('val');
 		$node = new RegistryNode(null);
 		$node->setAttachedValue($obj);
@@ -87,7 +87,7 @@ class RegistryNodeTest extends UnitTestCase
 		//$this->assertIdentical($node->getValue(), $obj);
 		$this->assertIdentical($obj, $node->getValue());
 	}
-	
+
 	public function testReadOnly()
 	{
 		$node = new RegistryNode("myval");
@@ -96,15 +96,15 @@ class RegistryNodeTest extends UnitTestCase
 		try {
 			$node->setValue("myval");
 			$this->fail("Should not be able to set value of readonly node.");
-		} catch (\Vcms\Exception\OverwriteException $e) {}
-		
+		} catch (\Vcms\Exception\Overwrite $e) {}
+
 		$node = new RegistryNode("myval", true);
 		$this->assertTrue($node->isReadOnly());
 		try {
 			$node->setValue("myval");
 			$this->fail("Should not be able to set value of readonly node.");
-		} catch (\Vcms\Exception\OverwriteException $e) {}
-		
+		} catch (\Vcms\Exception\Overwrite $e) {}
+
 		$obj = array("my"=>'value');
 		$node = new RegistryNode(null);
 		$node->setAttachedValue($obj);
@@ -113,6 +113,6 @@ class RegistryNodeTest extends UnitTestCase
 		try {
 			$node->setValue("myval");
 			$this->fail("Should not be able to set value of readonly node.");
-		} catch (\Vcms\Exception\OverwriteException $e) {}
+		} catch (\Vcms\Exception\Overwrite $e) {}
 	}
 }

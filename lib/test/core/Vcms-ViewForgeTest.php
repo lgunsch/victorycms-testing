@@ -32,7 +32,7 @@ class ViewForgeTest extends UnitTestCase
 		parent::__construct('ViewForge Test');
 	}
 
-	
+
 	public function testInstance()
 	{
 		$forge = ViewForge::getInstance();
@@ -44,21 +44,21 @@ class ViewForgeTest extends UnitTestCase
 			'Copy references are different'
 		);
 	}
-	
+
 	public function testClone()
 	{
 		$forge = ViewForge::getInstance();
 		try {
 			$forge2 = clone $forge;
 			$this->fail('Did not throw an exception when cloning');
-		} catch (Vcms\Exception\SingletonCopyException $e) {}
+		} catch (Vcms\Exception\SingletonCopy $e) {}
 	}
-	
+
 	public function testForge()
-	{	
+	{
 		$forgeSpec = "
 		{
-				
+
 			\"objects\":[
 					{
 						\"name\":\"TestView\",
@@ -70,19 +70,19 @@ class ViewForgeTest extends UnitTestCase
 			]
 		}
 		";
-		
+
 		$response = ViewForge::forge($forgeSpec);
 		$this->assertIdentical($response->getStatusCode(), 200);
 		$this->assertIdentical($response->getStatusMessage(), "OK");
 		$this->assertIdentical($response->getContentType(), "text/html; charset=utf-8");
 		$this->assertIdentical($response->getBody(), "12345");
 	}
-	
+
 	public function testMultipleForge()
 	{
 		$forgeSpec = "
 		{
-				
+
 			\"objects\":[
 					{
 						\"name\":\"TestView\",
@@ -101,19 +101,19 @@ class ViewForgeTest extends UnitTestCase
 			]
 		}
 		";
-		
+
 		$response = ViewForge::forge($forgeSpec);
 		$this->assertIdentical($response->getStatusCode(), 200);
 		$this->assertIdentical($response->getStatusMessage(), "OK");
 		$this->assertIdentical($response->getContentType(), "text/html; charset=utf-8");
 		$this->assertIdentical($response->getBody(), "12345678910");
 	}
-	
+
 	public function testMalformedForgespec()
 	{
 		$forgeSpec = "
 		{
-				
+
 			\"objects\":[
 					{
 						\"badname\":\"TestView\",
@@ -125,19 +125,19 @@ class ViewForgeTest extends UnitTestCase
 			]
 		}
 		";
-		
+
 		try{
 			ViewForge::forge($forgeSpec);
 			$this->fail('Did not throw an exception with a malformed forgeSpec');
 		} catch(Exception $e){}
-		
+
 	}
-	
+
 	public function testMissingView()
 	{
 		$forgeSpec = "
 		{
-				
+
 			\"objects\":[
 					{
 						\"name\":\"NonExistingView\",
@@ -149,19 +149,19 @@ class ViewForgeTest extends UnitTestCase
 			]
 		}
 		";
-		
+
 		$response = ViewForge::forge($forgeSpec);
 		$this->assertIdentical($response->getStatusCode(), 404);
 		$this->assertIdentical($response->getStatusMessage(), "Not Found");
 		$this->assertIdentical($response->getContentType(), null);
 		$this->assertIdentical($response->getBody(), null);
 	}
-	
+
 	public function testDifferentMimeTypes()
 	{
 		$forgeSpec = "
 			{
-					
+
 				\"objects\":[
 						{
 							\"name\":\"TestView\",
@@ -180,15 +180,15 @@ class ViewForgeTest extends UnitTestCase
 				]
 			}
 			";
-		
-		$response = ViewForge::forge($forgeSpec);	
+
+		$response = ViewForge::forge($forgeSpec);
 		$this->assertIdentical($response->getStatusCode(), 500);
 		$this->assertIdentical($response->getStatusMessage(), "Internal Server Error");
 		$this->assertIdentical($response->getContentType(), null);
 		$this->assertIdentical($response->getBody(), null);
 	}
 
-	
+
 
 }
 
