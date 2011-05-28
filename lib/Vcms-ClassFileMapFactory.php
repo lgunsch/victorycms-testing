@@ -1,12 +1,20 @@
 <?php
+/**
+ * VictoryCMS - ClassFileMapFactory
+ *
+ * @filesource
+ * @category  VictoryCMS
+ * @package   Testing
+ * @author    A.J. Brown
+ * @see       http://ajbrown.org/blog/2008/12/02/an-auto-loader-using-php-tokenizer.html
+ */
+
 namespace Vcms;
 
 /**
  * Class to handle generating the class file map, and loading of classes
  *
- * @author A.J. Brown
- * @package com.hypermuttlabs
- * @subpackage packaging
+ * @package Testing
  */
 abstract class ClassFileMapFactory
 {
@@ -15,6 +23,7 @@ abstract class ClassFileMapFactory
 	 *
 	 * @param string $sClassPath the path to analyze
 	 * @param string $sName      the name for this class file map
+	 *
 	 * @return ClassFileMap
 	 */
 	public static function generate($sClassPath, $sName = null)
@@ -22,12 +31,15 @@ abstract class ClassFileMapFactory
 		$aClassMap = static::_getClassFileMapArray($sClassPath, true);
 		$oClassfileMap = new ClassFileMap($sName);
 		$oClassfileMap->setClassPath($aClassMap);
-		
+
 		return $oClassfileMap;
 	}
 
 	/**
 	 * Generates a class file map for the specified directory
+	 *
+	 * @param string  $sDirectory directry path.
+	 * @param boolean $bRecursive true if directory should be recursively searched.
 	 *
 	 * @return array
 	 */
@@ -51,7 +63,7 @@ abstract class ClassFileMapFactory
 		$sHiddenFiles = '/\/\.\w+/';
 
 		$aDeclarations = array();
-		
+
 		/*
 		 * Load the list of files in the directory
 		 */
@@ -74,7 +86,7 @@ abstract class ClassFileMapFactory
 				for ($i=0; $i < $iNumtokens; $i++) {
 					switch ($aTokens[$i][0]) {
 						case T_NAMESPACE:
-							/* 
+							/*
 							 * Namespaces are required to be the first line of
 							 * code if they are used, so this will set the current
 							 * files $fileNamespace before any T_CLASS or
@@ -103,11 +115,13 @@ abstract class ClassFileMapFactory
 								$aDeclarations["{$fileNamespace}{$aTokens[$i][1]}"] = $sName;
 							}
 							break;
+						default:
+							/* We do nothing by default */
+							break;
 					}
 				}
 			}
 		}
-		//print_r($aDeclarations);	
 		return $aDeclarations;
 	}
 }

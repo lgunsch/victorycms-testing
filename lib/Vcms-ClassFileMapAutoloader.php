@@ -1,13 +1,20 @@
 <?php
+/**
+ * VictoryCMS - ClassFileMapAutoloader
+ *
+ * @filesource
+ * @category  VictoryCMS
+ * @package   Testing
+ * @author    A.J. Brown
+ * @see       http://ajbrown.org/blog/2008/12/02/an-auto-loader-using-php-tokenizer.html
+ */
+
 namespace Vcms;
 
 /**
  * Autoloads classes using class file maps
  *
- * @author A.J. Brown
- * @package com.hypermuttlabs
- * @subpackage packaging
- *
+ * @package Testing
  */
 class ClassFileMapAutoloader
 {
@@ -18,9 +25,9 @@ class ClassFileMapAutoloader
 	 * by their name if the second parameter is true, resulting in a second
 	 * class file with the same name overwriting the first.
 	 *
-	 * @param ClassFileMap $oClassFileMap
-	 * @param bool $bUseName use the value of {@link ClassFileMap::getName()}
-	 *  as the key
+	 * @param ClassFileMap $oClassFileMap file map object.
+	 * @param bool         $bUseName      use the value of {@link ClassFileMap::getName()}
+	 *                                    as the key
 	 *
 	 * @return void
 	 */
@@ -40,22 +47,23 @@ class ClassFileMapAutoloader
 	 */
 	public function registerAutoload()
 	{
-		return spl_autoload_register(array(&$this, 'autoload')); 
+		return spl_autoload_register(array(&$this, 'autoload'));
 	}
 
 	/**
 	 * Autloads classes, if they can be found in the class file maps associated
 	 * with this autoloader.
 	 *
-	 * @param string $sClass
-	 * @return string the class name if found, otherwise false
+	 * @param string $sClass class to autoload.
+	 *
+	 * @return string the class name if found, otherwise false.
 	 */
 	public function autoload($sClass)
 	{
-		if (class_exists($sClass, false ) || interface_exists($sClass))	{
+		if (class_exists($sClass, false) || interface_exists($sClass))	{
 			return false;
 		}
-		
+
 		$sPath = $this->lookup($sClass);
 		if ($sPath !== null) {
 			require_once $sPath;
@@ -67,7 +75,8 @@ class ClassFileMapAutoloader
 	/**
 	 * Loop through class files maps untill a match is found
 	 *
-	 * @param string $sClassName
+	 * @param string $sClassName name of class.
+	 *
 	 * @return string the path of the class, or null if not found
 	 */
 	public function lookup($sClassName)
@@ -81,14 +90,14 @@ class ClassFileMapAutoloader
 
 		return null;
 	}
-	
+
 	/**
 	 * Looks through all the class paths loaded into ClassFileMaps used by this
 	 * autoloader and returns the class names contained in that file in an
 	 * array.
-	 * 
+	 *
 	 * @param array $path of the class names contained in the file path.
-	 * 
+	 *
 	 * @return array of Classes contained in the file $path.
 	 */
 	public function reverseLookup($path)

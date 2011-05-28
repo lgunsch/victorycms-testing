@@ -1,13 +1,20 @@
 <?php
+/**
+ * VictoryCMS - ClassFileMap
+ *
+ * @filesource
+ * @category  VictoryCMS
+ * @package   Testing
+ * @author    A.J. Brown
+ * @see       http://ajbrown.org/blog/2008/12/02/an-auto-loader-using-php-tokenizer.html
+ */
+
 namespace Vcms;
 
 /**
  * Manages a map of class names to their paths
  *
- * @author A.J. Brown
- * @package com.hypermuttlabs
- * @subpackage packaging
- *
+ * @package Testing
  */
 class ClassFileMap
 {
@@ -45,14 +52,14 @@ class ClassFileMap
 	 * of class names and thier paths.
 	 *
 	 * @param string|array  $mClassName the class name to map
-	 * @param string   $sPath the path to map to
+	 * @param string        $sPath      the path to map to
 	 *
 	 * @return void
 	 */
 	public function setClassPath($mClassName, $sPath = null)
 	{
-		if(is_array($mClassName)) {
-			foreach($mClassName as $sClassName => $sPath) {
+		if (is_array($mClassName)) {
+			foreach ($mClassName as $sClassName => $sPath) {
 				$this->setClassPath($sClassName, $sPath);
 			}
 			return;
@@ -73,7 +80,8 @@ class ClassFileMap
 	/**
 	 * Determine if a class is mapped
 	 *
-	 * @param string $sClassName
+	 * @param string $sClassName name of class.
+	 *
 	 * @return boolean true if the class is mapped
 	 */
 	public function isMapped($sClassName)
@@ -84,8 +92,9 @@ class ClassFileMap
 	/**
 	 * Returns the path of the file if mapped, otherwise null
 	 *
-	 * @param  string  $sClassName the class to lookup
-	 * @return  string the full path to the file containing the class
+	 * @param string $sClassName the class to lookup
+	 *
+	 * @return string the full path to the file containing the class
 	 */
 	public function lookup($sClassName)
 	{
@@ -98,7 +107,8 @@ class ClassFileMap
 	/**
 	 * Returns an array of classes which exist within a given file path
 	 *
-	 * @param unknown_type $sFileName
+	 * @param string $sFileName name of file.
+	 *
 	 * @return unknown
 	 */
 	public function getClassesInFile($sFileName)
@@ -110,6 +120,7 @@ class ClassFileMap
 	 * Retreives the entire class-file map as an array with class names as keys
 	 * and their paths as values
 	 *
+	 * @return unknown
 	 */
 	public function getClassMap()
 	{
