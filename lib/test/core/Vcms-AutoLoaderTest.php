@@ -53,10 +53,9 @@ class AutoloaderMock extends Autoloader
 	{
 		// Just so that we can remove the instance between tests.
 		static::$instance = null;
-		static::$directoryFiles = null;
-		if (Registry::isKey(RegistryKeys::AUTOLOAD)) {
-			Registry::clear(RegistryKeys::AUTOLOAD);
-		}
+		static::$directoryFilesCache = array();
+		static::$ignoreDirs = array();
+		static::$searchDirs = array();
 	}
 }
 
@@ -170,14 +169,9 @@ class AutoloaderTest extends UnitTestCase
 		// Regular directory adding
 		AutoloaderMock::addDir($path1);
 		$this->assertIdentical(array($path1), Autoloader::listDirs());
-		$this->assertIdentical(array($path1), Registry::get(RegistryKeys::AUTOLOAD));
 
 		AutoloaderMock::addDir($path2);
 		$this->assertIdentical(array($path1, $path2), Autoloader::listDirs());
-		$this->assertIdentical(
-			array($path1, $path2),
-			Registry::get(RegistryKeys::AUTOLOAD)
-		);
 
 		// test bad directory
 		try {
@@ -189,7 +183,7 @@ class AutoloaderTest extends UnitTestCase
 		try {
 			AutoloaderMock::addDir('');
 			$this->fail("Should not be able to add an empty string.");
-		} catch (\Vcms\Exception\InvalidType $e) {}
+		} catch (\Vcms\Exception\InvalidValue $e) {}
 
 		$this->assertTrue(rmdir($path1));
 		$this->assertTrue(rmdir($path2));
@@ -401,6 +395,7 @@ class AutoloaderTest extends UnitTestCase
 
 		// Add in the temp directory path
 		Autoloader::addDir($this->tempDir);
+		Autoloader::scanDirs();
 	}
 
 	/*
@@ -421,11 +416,11 @@ class AutoloaderTest extends UnitTestCase
 	public function testFlatDirLoad()
 	{
 		$this->setupTempDir();
-		$this->setupAutoloader();
 
 		// Create the class and test autoloading, remove the file once we are finished
 		$path = FileUtils::truepath($this->tempDir.'/vcms.testing.atest.php');
 		$this->writePHPFile('Vcms\Testing', 'ATest', $path);
+		$this->setupAutoloader();
 		$var = new \Vcms\Testing\ATest();
 
 		$this->assertTrue(unlink($path));
@@ -439,7 +434,6 @@ class AutoloaderTest extends UnitTestCase
 	public function testMultiDirLoad()
 	{
 		$this->setupTempDir();
-		$this->setupAutoloader();
 
 		// Create a few sub-folders
 		$dirPath = FileUtils::truepath($this->tempDir.'/a/b');
@@ -448,6 +442,7 @@ class AutoloaderTest extends UnitTestCase
 		// Create the class and test autoloading, remove the file once we are finished
 		$path = Autoloader::truepath($dirPath.'/vcms.testing.atest.php');
 		$this->writePHPFile('Vcms\Testing', 'ATest', $path);
+		$this->setupAutoloader();
 		$var = new Vcms\Testing\ATest();
 
 		$this->assertTrue(unlink($path));
