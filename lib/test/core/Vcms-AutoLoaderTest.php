@@ -232,7 +232,7 @@ class AutoloaderTest extends UnitTestCase
 
 		foreach ($fileNames as $fileName) {
 			//echo "Matching: $fileName\n";
-			foreach($patterns as $pattern) {
+			foreach ($patterns as $pattern) {
 				$num = preg_match($pattern, $fileName);
 				$this->assertIdentical(1, $num, "Should match $fileName");
 			}
@@ -259,7 +259,7 @@ class AutoloaderTest extends UnitTestCase
 		);
 
 		foreach ($badNames as $badName) {
-			foreach($patterns as $pattern) {
+			foreach ($patterns as $pattern) {
 				$num = preg_match($pattern, $badName);
 				$this->assertIdentical(0, $num, "Should not match $badName");
 			}
@@ -308,7 +308,7 @@ class AutoloaderTest extends UnitTestCase
 
 		foreach ($fileNames as $fileName) {
 			//echo "Matching: $fileName\n";
-			foreach($patterns as $pattern) {
+			foreach ($patterns as $pattern) {
 				$num = preg_match($pattern, $fileName);
 				$this->assertIdentical(1, $num, "Should match $fileName");
 			}
@@ -335,7 +335,7 @@ class AutoloaderTest extends UnitTestCase
 		);
 
 		foreach ($badNames as $badName) {
-			foreach($patterns as $pattern) {
+			foreach ($patterns as $pattern) {
 				$num = preg_match($pattern, $badName);
 				$this->assertIdentical(0, $num, "Should not match $badName");
 			}
