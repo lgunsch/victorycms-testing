@@ -1,9 +1,9 @@
 <?php
 
-use Vcms\CssView;
+use Vcms\View\Css;
 
 
-class TestView3 extends CssView
+class TestView3 extends Css
 {
 	public function __construct($params){
 	}

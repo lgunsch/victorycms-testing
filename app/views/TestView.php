@@ -1,9 +1,9 @@
 <?php
 
-use Vcms\HtmlView;
+use Vcms\View\Html;
 
 
-class TestView extends HtmlView
+class TestView extends Html
 {
 	public function __construct($params){
 	}

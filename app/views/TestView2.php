@@ -1,11 +1,11 @@
 <?php
 
-use Vcms\HtmlView;
+use Vcms\View\Html;
 
 
-class TestView2 extends HtmlView
+class TestView2 extends Html
 {
-	public function __construct($params){	
+	public function __construct($params){
 	}
 	public function render(){
 		return "678910";
