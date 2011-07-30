@@ -155,7 +155,7 @@ class LoadManagerTest extends UnitTestCase
 		try {
 			LoadManager::load($config1);
 			$this->fail('Did not throw an exception with a bad JSON file.');
-		} catch(Exception $e) {}
+		} catch(\Vcms\Exception\Syntax $e) {}
 
 		fclose($handle1);
 		unlink($config1);
@@ -170,12 +170,12 @@ class LoadManagerTest extends UnitTestCase
 
 		$config1 = tempnam("./", "config1");
 		$handle1 = fopen($config1, "w");
-		fwrite($handle1, "{\"load:\"".$config1."nonexisting\"}"); // non existing filepath
+		fwrite($handle1, '{"load":'.'"'.$config1.'nonexisting"}'); // non existing filepath
 
 		try{
 			LoadManager::load($config1);
 			$this->fail('Did not throw an exception with a configuration path.');
-		} catch(Exception $e) {}
+		} catch(\Vcms\Exception\NotFound $e) {}
 
 		fclose($handle1);
 		unlink($config1);
