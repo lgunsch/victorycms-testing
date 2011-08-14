@@ -24,6 +24,25 @@ use Vcms\LoadManager;
 use Vcms\Registry;
 
 /*
+ * Use a mock registry so we can clear key/values between tests.
+ */
+class RegistryMock extends Registry
+{
+	private static $oldInstance;
+
+	public static function clearInstance()
+	{
+		static::$oldInstance = static::$instance;
+		static::$instance = new static();
+	}
+
+	public static function restoreInstance()
+	{
+		static::$instance = static::$oldInstance;
+	}
+}
+
+/*
  * Unit test for fully testing the load manager.
  */
 class LoadManagerTest extends UnitTestCase
@@ -31,6 +50,16 @@ class LoadManagerTest extends UnitTestCase
 	public function __construct()
 	{
 		parent::__construct('LoadManager Test');
+	}
+
+	public function setUp()
+	{
+		RegistryMock::clearInstance();
+	}
+
+	public function tearDown()
+	{
+		RegistryMock::restoreInstance();
 	}
 
 	/*
@@ -76,7 +105,7 @@ class LoadManagerTest extends UnitTestCase
 							\"setting1\":\"success\",
 							\"setting2\":{
 									\"value\":\"success\",
-									\"readonly\":true
+									\"readonly\":false
 								}
 							}");
 
@@ -85,16 +114,16 @@ class LoadManagerTest extends UnitTestCase
 		} catch(Exception $e) {
 			$this->fail('Threw an exception while loading a single config file.');
 		}
+
+		$this->assertTrue(Registry::isKey('setting1'));
+		$this->assertTrue(Registry::isReadOnly("setting1"));
+		$this->assertEqual(Registry::get("setting1"), "success");
+
 		// Check that the correct values of config2 are actually being put in Registry
-		$this->assertTrue(
-			Registry::isReadOnly("setting2"),
-			"Read only value not loading properly via LoadManager"
-		);
+		$this->assertTrue(Registry::isKey('setting2'));
+		$this->assertFalse(Registry::isReadOnly("setting2"));
 		$value = Registry::get("setting2");
-		$this->assertEqual(
-			$value[0],
-			"success", "Values are loading into Registry properly via LoadManager"
-		);
+		$this->assertEqual($value[0], "success");
 
 		fclose($handle1);
 		fclose($handle2);
@@ -126,12 +155,10 @@ class LoadManagerTest extends UnitTestCase
 			$this->fail('Threw an exception while loading multiple config files.');
 		}
 
-		$value = Registry::get("secondfile");
-
-		$this->assertEqual(
-			$value,
-			"success2", "Values are loading into Registry properly via LoadManager"
-		);
+		$this->assertTrue(Registry::isKey("firstfile"));
+		$this->assertEqual(Registry::get("firstfile"), "success1");
+		$this->assertTrue(Registry::isKey("secondfile"));
+		$this->assertEqual(Registry::get("secondfile"), "success2");
 
 		fclose($handle1);
 		fclose($handle2);
