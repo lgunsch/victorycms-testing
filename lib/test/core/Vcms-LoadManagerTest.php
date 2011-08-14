@@ -180,38 +180,5 @@ class LoadManagerTest extends UnitTestCase
 		fclose($handle1);
 		unlink($config1);
 	}
-
-	/*
-	 * Test loading configuration files which reference each other recursively.
-	 */
-	public function testRecursiveLoad()
-	{
-		$loader = LoadManager::getInstance();
-
-		$config1 = tempnam("./", "config1");
-		$config2 = tempnam("./", "config2");
-		$handle1 = fopen($config1, "w");
-		$handle2 = fopen($config2, "w");
-		fwrite($handle1, "{\"load\":[\"$config2\"], \"config1\":\"success1\"}");
-		fwrite($handle2, "{\"load\":[\"$config1\"], \"config2\":\"success2\"}");
-
-		try {
-			LoadManager::load($config1);
-		} catch(Exception $e) {
-			$this->fail('Threw an exception while loading config files.');
-		}
-
-		$value1 = Registry::get("config1");
-		$value2 = Registry::get("config2");
-		// this should not be an array since there is only one value
-		// recursive loading should not make it an array
-		$this->assertEqual($value1, "success1");
-		$this->assertEqual($value2, "success2");
-
-		fclose($handle1);
-		fclose($handle2);
-		unlink($config1);
-		unlink($config2);
-	}
 }
 
