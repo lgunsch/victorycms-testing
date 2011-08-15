@@ -32,7 +32,6 @@ class ViewForgeTest extends UnitTestCase
 		parent::__construct('ViewForge Test');
 	}
 
-
 	public function testInstance()
 	{
 		$forge = ViewForge::getInstance();
@@ -130,7 +129,6 @@ class ViewForgeTest extends UnitTestCase
 			ViewForge::forge($forgeSpec);
 			$this->fail('Did not throw an exception with a malformed forgeSpec');
 		} catch(Exception $e){}
-
 	}
 
 	public function testMissingView()
@@ -188,7 +186,43 @@ class ViewForgeTest extends UnitTestCase
 		$this->assertIdentical($response->getBody(), null);
 	}
 
+	public function testForgeArray()
+	{
+		$forgeArray = array(
+			"objects"=>array(
+				array(
+					"name"=>"TestView",
+					"params"=>array(
+						"test1"=>array("obj1", "obj2"),
+						"test2"=>array("obj3", "obj4")
+					)
+				),
+				array(
+					"name"=>"TestView2",
+					"params"=>array(
+						"test1"=>array("obj1", "obj2"),
+						"test2"=>array("obj3", "obj4")
+					)
+				)
+			)
+		);
 
+		$response = ViewForge::forgeArray($forgeArray);
+		$this->assertIdentical($response->getStatusCode(), 200);
+		$this->assertIdentical($response->getStatusMessage(), "OK");
+		$this->assertIdentical($response->getContentType(), "text/html; charset=utf-8");
+		$this->assertIdentical($response->getBody(), "12345678910");
+	}
 
+	public function testForgeArrayBadJson()
+	{
+		// An invalid UTF8 sequence
+		$forgeArray = array("\xB1\x31");
+
+		try {
+			$response = ViewForge::forgeArray($forgeArray);
+			$this->fail('Did not throw an exception with a malformed forgeSpec Array');
+		} catch(Exception $e){}
+	}
 }
 
