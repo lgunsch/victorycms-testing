@@ -68,7 +68,10 @@ abstract class ClassFileMapFactory
 		 * Load the list of files in the directory
 		 */
 		foreach ($oFiles as $sName => $aFile) {
-			if (! preg_match($sHiddenFiles, $sName) && !$aFile->isDir()) {
+			$extension = strtolower(substr($sName, strlen($sName) - 3));
+			if (! preg_match($sHiddenFiles, $sName) && !$aFile->isDir()
+				&& strcmp($extension, 'php') == 0
+			) {
 				$oFile = $aFile->openFile();
 
 				$sContents = null;
