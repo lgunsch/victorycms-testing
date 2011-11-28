@@ -193,8 +193,13 @@ class RegistryTest extends UnitTestCase
 		$this->assertFalse(Registry::isKey('random-bad'));
 		Registry::set('is-key', false);
 		$this->assertTrue(Registry::isKey('is-key'));
+ 		Registry::set('is-key-2', false);
+		Registry::set('is-key-3', false);
+		$this->assertTrue(Registry::isKey('is-key', 'is-key-2', 'is-key-3'));
 		Registry::clear('is-key');
 		$this->assertFalse(Registry::isKey('is-key'));
+		$this->assertFalse(Registry::isKey(array('is-key', 'is-key-2',
+			'is-key-3')));
 	}
 
 	public function testIsReadOnly()
